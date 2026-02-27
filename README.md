@@ -1,0 +1,111 @@
+# VeChain Development Skill for Claude Code
+
+A comprehensive Claude Code skill for modern VeChain development (February 2026 best practices).
+
+## Overview
+
+This skill provides Claude Code with deep knowledge of the current VeChain development ecosystem:
+
+- **UI**: `@vechain/dapp-kit-react` for React/Next.js wallet connection and dApp integration
+- **SDK**: `@vechain/sdk-core` + `@vechain/sdk-network` for all client/transaction work
+- **Legacy Interop**: Migration patterns from Connex/Thor DevKit to the unified SDK
+- **Smart Contracts**: Solidity with Hardhat + `@vechain/sdk-hardhat-plugin`
+- **Testing**: Hardhat testing with Thor Solo local node
+- **Codegen**: ABI-driven TypeChain client generation
+- **Unique Features**: Multi-clause transactions, fee delegation (VIP-191/MPP)
+- **Security**: Comprehensive Solidity vulnerability patterns and prevention
+
+## Installation
+
+### Quick Install
+
+```bash
+npx skills add https://github.com/vechain/vechain-dev-skills
+```
+
+### Manual Install
+
+```bash
+git clone https://github.com/vechain/vechain-dev-skills
+cd vechain-dev-skills
+./install.sh
+```
+
+## Skill Structure
+
+```
+skill/
+├── SKILL.md                          # Main skill definition (required)
+├── frontend-dapp-kit.md              # UI patterns with @vechain/dapp-kit
+├── sdk-migration.md                  # Connex/Thor DevKit -> SDK migration
+├── smart-contracts.md                # Solidity development with Hardhat
+├── smart-contracts-optimization.md   # Gas optimization patterns
+├── testing.md                        # Testing (Hardhat / Thor Solo)
+├── abi-codegen.md                    # ABI and TypeChain client generation
+├── fee-delegation.md                 # Fee delegation (VIP-191 / MPP)
+├── multi-clause-transactions.md      # Multi-clause transaction patterns
+├── security.md                       # Security vulnerabilities & prevention
+└── resources.md                      # Curated reference links
+```
+
+## Usage
+
+Once installed, Claude Code will automatically use this skill when you ask about:
+
+- VeChain dApp UI work (React / Next.js)
+- VeWorld wallet connection and signing flows
+- Transaction building, sending, and confirmation UX
+- Solidity smart contract development on VeChainThor
+- Multi-clause transactions and fee delegation
+- Local testing with Thor Solo
+- Security hardening and audit-style reviews
+
+### Example Prompts
+
+```
+"Help me set up a Next.js app with VeWorld wallet connection"
+"Create a Solidity ERC-20 token contract for VeChain"
+"How do I use multi-clause transactions to batch operations?"
+"Set up fee delegation so users don't pay gas"
+"Write Hardhat tests for my token transfer contract"
+"Review this contract for security issues"
+```
+
+## Stack Decisions
+
+This skill encodes opinionated best practices:
+
+| Layer | Default Choice | Alternative |
+|-------|---------------|-------------|
+| UI Framework | @vechain/dapp-kit-react | @vechain/vechain-kit (v2) |
+| Client SDK | @vechain/sdk-core + sdk-network | @vechain/sdk-ethers-adapter |
+| Smart Contracts | Solidity + Hardhat | Foundry |
+| Local Node | Thor Solo (Docker) | Thor Solo (binary) |
+| Client Generation | TypeChain | Manual ABI wrappers |
+| Fee Abstraction | VIP-191 Designated Gas Payer | MPP (contract-level) |
+
+## Content Sources
+
+This skill incorporates best practices from:
+
+- [VeChain Official Documentation](https://docs.vechain.org/)
+- [VeChain SDK GitHub](https://github.com/vechain/vechain-sdk-js)
+- [VeChain Thor Node](https://github.com/vechain/thor)
+- [VeChain dApp Kit](https://docs.vechain.org/developer-resources/sdks-and-providers/dapp-kit)
+
+## Progressive Disclosure
+
+The skill uses Claude Code's progressive disclosure pattern. The main `SKILL.md` provides core guidance, and Claude reads the specialized markdown files only when needed for specific tasks.
+
+## Contributing
+
+Contributions are welcome! Please ensure any updates reflect current VeChain ecosystem best practices.
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
