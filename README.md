@@ -97,7 +97,7 @@ This skill encodes opinionated best practices:
 | Local Node | Thor Solo (Docker) | Thor Solo (binary) |
 | Client Generation | TypeChain | Manual ABI wrappers |
 | Fee Abstraction | VIP-191 Designated Gas Payer | Generic Delegator (user-paid) |
-| Social Login | Privy (via VeChain Kit) | - |
+| Social Login | Privy (via VeChain Kit) | DIY with dapp-kit + Privy (complex) |
 
 ## Content Sources
 
