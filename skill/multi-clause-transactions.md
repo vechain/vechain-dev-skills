@@ -156,22 +156,22 @@ Handles both wallet and social login users automatically. Social login V3 smart 
 If using dapp-kit instead of VeChain Kit:
 
 ```tsx
-import { useConnex } from '@vechain/dapp-kit-react';
+import { useSendTransaction } from '@vechain/dapp-kit-react';
 
 function BatchOperation() {
-    const { vendor } = useConnex();
+    const { sendTransaction } = useSendTransaction();
 
     const handleBatch = async () => {
-        const result = await vendor
-            .sign('tx', [
+        const result = await sendTransaction({
+            clauses: [
                 { to: '0xRecipient1...', value: '0x' + (100e18).toString(16), data: '0x' },
                 { to: contractAddress, value: '0x0', data: encodedFunctionData },
                 { to: '0xRecipient2...', value: '0x' + (50e18).toString(16), data: '0x' },
-            ])
-            .comment('Batch: transfer + contract call + transfer')
-            .request();
+            ],
+            comment: 'Batch: transfer + contract call + transfer',
+        });
 
-        console.log('Transaction ID:', result.txid);
+        console.log('Transaction ID:', result.id);
     };
 
     return <button onClick={handleBatch}>Execute Batch</button>;

@@ -31,7 +31,7 @@ Use this Skill for any VeChain development task:
 
 ### 1. Detect project structure
 - `turbo.json` present → follow Turborepo conventions (`apps/frontend`, `packages/contracts`, `packages/*`)
-- Check which frontend package: VeChain Kit → use `useThor` (not `useConnex`); dapp-kit → `useConnex` is fine
+- Use `useThor` for Thor client access (both VeChain Kit and dapp-kit v2). `useConnex` is deprecated everywhere.
 - Apply conditional patterns (Chakra UI, i18n, Zustand) only when the project uses them
 
 ### 2. Classify the task layer

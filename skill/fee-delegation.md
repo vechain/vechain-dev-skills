@@ -130,28 +130,31 @@ No extra code needed in `useSendTransaction` -- delegation happens automatically
 
 ### Frontend: Fee Delegation via dapp-kit
 
-If using dapp-kit instead of VeChain Kit:
+If using dapp-kit instead of VeChain Kit, configure delegation at the provider level:
 
 ```tsx
-import { useConnex } from '@vechain/dapp-kit-react';
+<DAppKitProvider
+  nodeUrl="https://testnet.vechain.org"
+  genesis="test"
+  usePersistence={true}
+>
+```
+
+Then use `useSendTransaction` from dapp-kit with a delegation URL:
+```tsx
+import { useSendTransaction } from '@vechain/dapp-kit-react';
 
 function DelegatedTransaction() {
-  const { vendor } = useConnex();
+  const { sendTransaction } = useSendTransaction();
 
   const handleSend = async () => {
-    const result = await vendor
-      .sign('tx', [
-        {
-          to: '0x...',
-          value: '0x0',
-          data: encodedCallData,
-        },
-      ])
-      .delegate('https://sponsor-testnet.vechain.energy/by/YOUR_PROJECT_ID')
-      .comment('This transaction is sponsored')
-      .request();
+    const result = await sendTransaction({
+      clauses: [{ to: '0x...', value: '0x0', data: encodedCallData }],
+      comment: 'This transaction is sponsored',
+      delegatorUrl: 'https://sponsor-testnet.vechain.energy/by/YOUR_PROJECT_ID',
+    });
 
-    console.log('Transaction ID:', result.txid);
+    console.log('Transaction ID:', result.id);
   };
 
   return <button onClick={handleSend}>Send (Gasless)</button>;

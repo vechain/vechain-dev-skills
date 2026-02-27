@@ -553,14 +553,17 @@ When the project has `src/api/contracts/`:
 - Indexer queries go in `src/api/indexer/`
 
 ### useThor (not useConnex)
-When the project uses VeChain Kit, use `useThor` for direct Thor client access. `useConnex` is deprecated in VeChain Kit projects:
+`useConnex` is deprecated everywhere (including dapp-kit v2). Always use `useThor`:
 
 ```tsx
+// VeChain Kit
 import { useThor } from '@vechain/vechain-kit';
+
+// dapp-kit v2
+import { useThor } from '@vechain/dapp-kit-react';
+
 const thor = useThor();
 ```
-
-**Note**: `useConnex` is still valid in dapp-kit projects (`@vechain/dapp-kit-react`).
 
 ---
 
@@ -637,7 +640,7 @@ import { DAppKitProvider } from '@vechain/dapp-kit-react';
 </DAppKitProvider>
 ```
 
-Hooks: `useWallet()`, `useConnex()`, `useWalletModal()`, `useVechainDomain()`
+Hooks: `useWallet()`, `useThor()`, `useWalletModal()`, `useVechainDomain()`
 Components: `<WalletButton />`
 
 **Note**: dapp-kit has no transaction-sending hooks. Use `@vechain/sdk-network` for contract interaction and transaction submission.

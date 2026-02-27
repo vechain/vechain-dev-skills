@@ -66,10 +66,10 @@ const result = await contract.read.methodName(arg1, arg2);
 // OLD (Connex)
 const result = await connex.vendor.sign('tx', [clause]).request();
 
-// NEW (with dapp-kit - for frontend)
-import { useConnex } from '@vechain/dapp-kit-react';
-const { vendor } = useConnex();
-const result = await vendor.sign('tx', [clause]).request();
+// NEW (with dapp-kit v2 - for frontend)
+import { useThor } from '@vechain/dapp-kit-react';
+const thor = useThor();
+// Use thor for contract reads; use useSendTransaction for writes
 
 // NEW (with SDK - for backend/scripts)
 const signedTx = Transaction.of(body).sign(privateKey);
@@ -101,6 +101,7 @@ const provider = new VeChainProvider(thorClient);
 ```
 
 ## Common mistakes to prevent
+- Using `useConnex` anywhere (deprecated in both VeChain Kit and dapp-kit v2; use `useThor` instead)
 - Mixing Connex `thor` and SDK `ThorClient` in the same module (causes confusion)
 - Using deprecated `thor-devkit` for new transaction construction (use `@vechain/sdk-core`)
 - Importing `web3-providers-connex` when `@vechain/sdk-ethers-adapter` exists
