@@ -43,6 +43,12 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 - Backend/scripts: `@vechain/sdk-core` + `sdk-network` directly
 - Legacy Connex present: migrate or isolate behind adapter boundary
 
+**When to ask the user:** If the project doesn't already use VeChain Kit or dapp-kit and the user hasn't specified which to use, ask before choosing. Key questions:
+- Do you need social login (email, Google, passkey)? → VeChain Kit
+- Do you want pre-built UI modals and hooks (WalletButton, TransactionModal, token hooks)? → VeChain Kit
+- Do you want a lightweight wallet-only integration with minimal dependencies? → dapp-kit
+- Non-React framework? → dapp-kit
+
 ### 4. Implement with VeChain-specific correctness
 - Network: always explicit (`mainnet`/`testnet`/`solo`)
 - Gas: estimate first, use fee delegation where appropriate
