@@ -21,14 +21,14 @@ This skill provides Claude Code with deep knowledge of the current VeChain devel
 ### Quick Install
 
 ```bash
-npx skills add https://github.com/vechain/vechain-dev-skills
+npx skills add https://github.com/vechain/vechain-dev-skill
 ```
 
 ### Manual Install
 
 ```bash
-git clone https://github.com/vechain/vechain-dev-skills
-cd vechain-dev-skills
+git clone https://github.com/vechain/vechain-dev-skill
+cd vechain-dev-skill
 ./install.sh
 ```
 
