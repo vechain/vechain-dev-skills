@@ -8,6 +8,7 @@ Use this guidance when the user asks about:
 - Meta-transactions on VeChain
 - VIP-191 designated gas payer
 - Multi-Party Payment (MPP) protocol
+- Social login fee sponsorship (mandatory for social login users)
 
 ## Two Fee Delegation Protocols
 
@@ -109,7 +110,44 @@ const provider = new VeChainProvider(
 const signer = await provider.getSigner(senderAddress);
 ```
 
+### Frontend: Fee Delegation via VeChain Kit (preferred)
+
+VeChain Kit handles fee delegation automatically when configured in the provider:
+
+```tsx
+// In VeChainKitProvider setup
+<VeChainKitProvider
+  feeDelegation={{
+    delegatorUrl: 'https://your-delegator.com/delegate',
+    delegateAllTransactions: true, // Sponsor all users, not just social login
+  }}
+>
+
+// Transactions are automatically delegated -- no extra code needed
+import { useSendTransaction, useWallet } from '@vechain/vechain-kit';
+
+function DelegatedTransaction() {
+  const { account } = useWallet();
+  const { sendTransaction, status } = useSendTransaction({
+    signerAccountAddress: account?.address ?? '',
+  });
+
+  const handleSend = async () => {
+    // Fee delegation happens automatically via provider config
+    await sendTransaction([
+      { to: '0x...', value: '0x0', data: encodedCallData, comment: 'Sponsored action' },
+    ]);
+  };
+
+  return <button onClick={handleSend}>Send (Gasless)</button>;
+}
+```
+
+**Important**: Fee delegation is **mandatory** for social login users since they cannot hold VTHO directly.
+
 ### Frontend: Fee Delegation via dapp-kit
+
+If using dapp-kit instead of VeChain Kit:
 
 ```tsx
 import { useConnex } from '@vechain/dapp-kit-react';
@@ -245,6 +283,19 @@ function shouldSponsor(tx: TransactionBody): boolean {
 }
 ```
 
+## Fee Delegation with vechain.energy (managed service)
+
+For quick setup without building your own service:
+
+1. Go to [vechain.energy](https://vechain.energy/)
+2. Create a sponsorship project
+3. Whitelist the smart contract addresses
+4. For VeChain Kit smart accounts, whitelist:
+   - **Mainnet**: `0xD7B96cAC488fEE053daAf8dF74f306bBc237D3f5`
+   - **Testnet**: `0x7C5114ef27a721Df187b32e4eD983BaB813B81Cb`
+5. Enable email alerts for low VTHO balance
+6. Use the generated delegation URL in your provider config
+
 ## UX and Security Checklist
 
 - Always show the user that their transaction is sponsored (no hidden fees)
@@ -255,3 +306,4 @@ function shouldSponsor(tx: TransactionBody): boolean {
 - Log all sponsored transactions for auditing
 - Consider time-limited sponsorship for promotional campaigns
 - Handle delegation service downtime gracefully (fallback to user-paid)
+- For social login users: fee delegation is mandatory, ensure your service is always available

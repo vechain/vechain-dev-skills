@@ -6,6 +6,23 @@
 - [VeChainThor Transaction Model](https://docs.vechain.org/core-concepts/transactions/transaction-model)
 - [Dual-Token Economic Model](https://docs.vechain.org/introduction-to-vechain/dual-token-economic-model)
 
+## VeChain Kit (preferred for React/Next.js dApps)
+- [VeChain Kit Documentation](https://docs.vechainkit.vechain.org/)
+- [Should I Use It?](https://docs.vechainkit.vechain.org/discover-vechain-kit/should-i-use-it) (decision framework)
+- [Installation](https://docs.vechainkit.vechain.org/quickstart/installation)
+- [Provider Configuration](https://docs.vechainkit.vechain.org/quickstart/provider-configuration)
+- [Send Transactions](https://docs.vechainkit.vechain.org/quickstart/send-transactions)
+- [Hooks Reference](https://docs.vechainkit.vechain.org/hooks)
+- [Components Reference](https://docs.vechainkit.vechain.org/components)
+- [Social Login / Privy Setup](https://docs.vechainkit.vechain.org/quickstart/setup-privy-optional)
+- [Smart Accounts](https://docs.vechainkit.vechain.org/social-login/smart-accounts)
+- [Fee Delegation Setup](https://docs.vechainkit.vechain.org/fee-delegation/fee-delegation-setup)
+- [Theming](https://docs.vechainkit.vechain.org/customization/theming)
+- [@vechain/vechain-kit npm](https://www.npmjs.com/package/@vechain/vechain-kit)
+
+## Scaffolding
+- [create-vechain-dapp](https://www.npmjs.com/package/create-vechain-dapp) (`npx create-vechain-dapp@latest`)
+
 ## VeChain SDK
 - [VeChain SDK GitHub](https://github.com/vechain/vechain-sdk-js)
 - [@vechain/sdk-core npm](https://www.npmjs.com/package/@vechain/sdk-core) (offline: transactions, signing, encoding)
@@ -16,12 +33,14 @@
 - [SDK Contracts Guide](https://docs.vechain.org/developer-resources/sdks-and-providers/sdk/contracts)
 - [SDK ThorClient Guide](https://docs.vechain.org/developer-resources/sdks-and-providers/sdk/thor-client)
 
-## UI and Wallet Infrastructure
+## DApp Kit (lightweight alternative)
 - [DApp Kit Documentation](https://docs.vechain.org/developer-resources/sdks-and-providers/dapp-kit)
 - [@vechain/dapp-kit-react npm](https://www.npmjs.com/package/@vechain/dapp-kit-react)
 - [DApp Kit React Usage](https://docs.vechain.org/developer-resources/sdks-and-providers/dapp-kit/dapp-kit-1/react/usage)
-- [VeChain Kit v2 Documentation](https://docs.vechainkit.vechain.org/) (next-gen toolkit)
-- [VeWorld Wallet](https://www.veworld.net/) (official wallet)
+
+## Wallets
+- [VeWorld Wallet](https://www.veworld.net/) (official wallet -- browser extension + mobile)
+- [VeWorld Documentation](https://docs.vechain.org/core-concepts/wallets/veworld)
 
 ## Smart Contract Development
 
@@ -49,13 +68,17 @@
 ### Fee Delegation
 - [Fee Delegation Overview](https://docs.vechain.org/core-concepts/transactions/meta-transaction-features/fee-delegation)
 - [VIP-191 Integration Guide](https://docs.vechain.org/developer-resources/vip-191-designated-gas-payer/how-to-integrate-vip-191-i)
+- [vechain.energy Managed Delegation](https://vechain.energy/)
 
 ### Multi-Clause Transactions
 - [Multi-Clause Documentation](https://docs.vechain.org/core-concepts/transactions/meta-transaction-features/clauses-multi-task-transaction)
 
 ### Token Standards
-- [VIP-180 (Fungible Token)](https://github.com/vechain/VIPs/blob/master/vips/VIP-180.md) (ERC-20 compatible)
-- [VIP-181 (Non-Fungible Token)](https://github.com/vechain/VIPs/blob/master/vips/VIP-181.md) (ERC-721 compatible)
+- [VIP-180 (Fungible Token)](https://github.com/vechain/VIPs/blob/master/vips/VIP-180.md) (ERC-20 compatible, superseded by standard ERC-20)
+- [VIP-181 (Non-Fungible Token)](https://github.com/vechain/VIPs/blob/master/vips/VIP-181.md) (ERC-721 compatible, superseded by standard ERC-721)
+
+### VET Domains
+- [VET Domains](https://vet.domains/) (.vet domain name service)
 
 ## Ethers.js Compatibility
 - [@vechain/sdk-ethers-adapter npm](https://www.npmjs.com/package/@vechain/sdk-ethers-adapter)

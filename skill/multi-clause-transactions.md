@@ -131,7 +131,53 @@ const results = await thorClient.contracts.executeMultipleClausesCall([
 const [totalSupply, name, symbol, decimals, balance] = results;
 ```
 
+## Frontend Multi-Clause with VeChain Kit (preferred)
+
+```tsx
+import { useSendTransaction, useWallet } from '@vechain/vechain-kit';
+
+function BatchOperation() {
+    const { account } = useWallet();
+    const { sendTransaction, status, txReceipt } = useSendTransaction({
+        signerAccountAddress: account?.address ?? '',
+    });
+
+    const handleBatch = async () => {
+        await sendTransaction([
+            // Clause 1: Transfer VET
+            {
+                to: '0xRecipient1...',
+                value: '0x' + (100e18).toString(16),
+                data: '0x',
+                comment: 'Send 100 VET to Recipient 1',
+            },
+            // Clause 2: Call contract
+            {
+                to: contractAddress,
+                value: '0x0',
+                data: encodedFunctionData,
+                comment: 'Execute contract action',
+                abi: contractFunctionABI,
+            },
+            // Clause 3: Transfer VET
+            {
+                to: '0xRecipient2...',
+                value: '0x' + (50e18).toString(16),
+                data: '0x',
+                comment: 'Send 50 VET to Recipient 2',
+            },
+        ]);
+    };
+
+    return <button onClick={handleBatch}>Execute Batch</button>;
+}
+```
+
+**Note**: `useSendTransaction` handles multi-clause for both wallet and social login users automatically. Social login users with V3 smart accounts use `executeBatchWithAuthorization` under the hood.
+
 ## Frontend Multi-Clause with dapp-kit
+
+If using dapp-kit instead of VeChain Kit:
 
 ```tsx
 import { useConnex } from '@vechain/dapp-kit-react';
@@ -142,24 +188,9 @@ function BatchOperation() {
     const handleBatch = async () => {
         const result = await vendor
             .sign('tx', [
-                // Clause 1: Transfer VET
-                {
-                    to: '0xRecipient1...',
-                    value: '0x' + (100e18).toString(16),
-                    data: '0x',
-                },
-                // Clause 2: Call contract
-                {
-                    to: contractAddress,
-                    value: '0x0',
-                    data: encodedFunctionData,
-                },
-                // Clause 3: Transfer VET
-                {
-                    to: '0xRecipient2...',
-                    value: '0x' + (50e18).toString(16),
-                    data: '0x',
-                },
+                { to: '0xRecipient1...', value: '0x' + (100e18).toString(16), data: '0x' },
+                { to: contractAddress, value: '0x0', data: encodedFunctionData },
+                { to: '0xRecipient2...', value: '0x' + (50e18).toString(16), data: '0x' },
             ])
             .comment('Batch: transfer + contract call + transfer')
             .request();

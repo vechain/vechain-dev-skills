@@ -6,13 +6,14 @@ A comprehensive Claude Code skill for modern VeChain development (February 2026 
 
 This skill provides Claude Code with deep knowledge of the current VeChain development ecosystem:
 
-- **UI**: `@vechain/dapp-kit-react` for React/Next.js wallet connection and dApp integration
+- **UI**: `@vechain/vechain-kit` for full-featured React/Next.js dApps (social login, pre-built UI, token management)
+- **Lightweight UI**: `@vechain/dapp-kit-react` for wallet-only integrations or non-React frameworks
 - **SDK**: `@vechain/sdk-core` + `@vechain/sdk-network` for all client/transaction work
 - **Legacy Interop**: Migration patterns from Connex/Thor DevKit to the unified SDK
 - **Smart Contracts**: Solidity with Hardhat + `@vechain/sdk-hardhat-plugin`
 - **Testing**: Hardhat testing with Thor Solo local node
 - **Codegen**: ABI-driven TypeChain client generation
-- **Unique Features**: Multi-clause transactions, fee delegation (VIP-191/MPP)
+- **Unique Features**: Multi-clause transactions, fee delegation (VIP-191/MPP), social login
 - **Security**: Comprehensive Solidity vulnerability patterns and prevention
 
 ## Installation
@@ -36,7 +37,7 @@ cd vechain-dev-skills
 ```
 skill/
 ├── SKILL.md                          # Main skill definition (required)
-├── frontend-dapp-kit.md              # UI patterns with @vechain/dapp-kit
+├── frontend-vechain-kit.md           # UI patterns with VeChain Kit + dapp-kit
 ├── sdk-migration.md                  # Connex/Thor DevKit -> SDK migration
 ├── smart-contracts.md                # Solidity development with Hardhat
 ├── smart-contracts-optimization.md   # Gas optimization patterns
@@ -53,7 +54,7 @@ skill/
 Once installed, Claude Code will automatically use this skill when you ask about:
 
 - VeChain dApp UI work (React / Next.js)
-- VeWorld wallet connection and signing flows
+- VeWorld wallet connection and social login flows
 - Transaction building, sending, and confirmation UX
 - Solidity smart contract development on VeChainThor
 - Multi-clause transactions and fee delegation
@@ -63,11 +64,12 @@ Once installed, Claude Code will automatically use this skill when you ask about
 ### Example Prompts
 
 ```
-"Help me set up a Next.js app with VeWorld wallet connection"
+"Help me set up a Next.js app with VeChain Kit and social login"
 "Create a Solidity ERC-20 token contract for VeChain"
 "How do I use multi-clause transactions to batch operations?"
 "Set up fee delegation so users don't pay gas"
 "Write Hardhat tests for my token transfer contract"
+"Should I use VeChain Kit or dapp-kit for my project?"
 "Review this contract for security issues"
 ```
 
@@ -77,18 +79,20 @@ This skill encodes opinionated best practices:
 
 | Layer | Default Choice | Alternative |
 |-------|---------------|-------------|
-| UI Framework | @vechain/dapp-kit-react | @vechain/vechain-kit (v2) |
+| UI Framework | @vechain/vechain-kit | @vechain/dapp-kit-react (lightweight) |
 | Client SDK | @vechain/sdk-core + sdk-network | @vechain/sdk-ethers-adapter |
 | Smart Contracts | Solidity + Hardhat | Foundry |
 | Local Node | Thor Solo (Docker) | Thor Solo (binary) |
 | Client Generation | TypeChain | Manual ABI wrappers |
 | Fee Abstraction | VIP-191 Designated Gas Payer | MPP (contract-level) |
+| Social Login | Privy (via VeChain Kit) | - |
 
 ## Content Sources
 
 This skill incorporates best practices from:
 
 - [VeChain Official Documentation](https://docs.vechain.org/)
+- [VeChain Kit Documentation](https://docs.vechainkit.vechain.org/)
 - [VeChain SDK GitHub](https://github.com/vechain/vechain-sdk-js)
 - [VeChain Thor Node](https://github.com/vechain/thor)
 - [VeChain dApp Kit](https://docs.vechain.org/developer-resources/sdks-and-providers/dapp-kit)

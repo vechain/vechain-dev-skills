@@ -1,15 +1,15 @@
 ---
 name: vechain-dev
-description: End-to-end VeChain development playbook (Feb 2026). Prefer @vechain/dapp-kit-react for React/Next.js wallet connection and UI. Prefer @vechain/sdk-core + @vechain/sdk-network for all client/transaction/contract code. When legacy dependencies require Connex or Thor DevKit, migrate to the unified SDK. Covers VeWorld wallet integration, Solidity smart contracts with Hardhat, multi-clause transactions, fee delegation (VIP-191/MPP), Thor Solo testing, ABI-driven codegen, and security checklists.
+description: End-to-end VeChain development playbook (Feb 2026). Prefer @vechain/vechain-kit for React/Next.js dApps -- it provides wallet connection, social login, transaction hooks, pre-built UI components, token management, and smart accounts out of the box. For lightweight wallet-only integrations or non-React frameworks, use @vechain/dapp-kit-react. Prefer @vechain/sdk-core + @vechain/sdk-network for all backend/script/transaction code. Covers VeWorld wallet, social login (Privy), Solidity smart contracts with Hardhat, multi-clause transactions, fee delegation (VIP-191/MPP), Thor Solo testing, ABI-driven codegen, and security checklists.
 user-invocable: true
 ---
 
-# VeChain Development Skill (SDK-first)
+# VeChain Development Skill (VeChain Kit-first)
 
 ## What this Skill is for
 Use this Skill when the user asks for:
 - VeChain dApp UI work (React / Next.js)
-- VeWorld wallet connection + signing flows
+- Wallet connection + signing flows (VeWorld, social login)
 - Transaction building / sending / confirmation UX
 - Solidity smart contract development on VeChainThor
 - Multi-clause transactions (batching operations)
@@ -18,9 +18,11 @@ Use this Skill when the user asks for:
 - Security hardening and audit-style reviews
 
 ## Default stack decisions (opinionated)
-1) **UI: dapp-kit-react first**
-- Use `@vechain/dapp-kit-react` for wallet connection, hooks, and UI components.
-- Prefer VeWorld as the primary wallet via Wallet Standard discovery.
+1) **UI: VeChain Kit first**
+- Use `@vechain/vechain-kit` for full-featured dApps (React/Next.js).
+- Provides: wallet connection, social login (Privy), transaction hooks, pre-built UI components (WalletButton, TransactionModal), token management, VET domain resolution, smart accounts.
+- Tradeoff: larger bundle size. For lightweight wallet-only needs or non-React frameworks, use `@vechain/dapp-kit-react` instead.
+- See [Should I Use It?](https://docs.vechainkit.vechain.org/discover-vechain-kit/should-i-use-it) for the decision framework.
 
 2) **SDK: @vechain/sdk first**
 - Prefer `@vechain/sdk-core` for offline operations (transactions, signing, encoding).
@@ -54,7 +56,8 @@ When solving a VeChain task:
 - Infra (node/indexing/monitoring)
 
 ### 2. Pick the right building blocks
-- UI: dapp-kit-react patterns.
+- UI (full-featured): VeChain Kit patterns.
+- UI (lightweight/non-React): dapp-kit patterns.
 - Scripts/backends: @vechain/sdk-core + sdk-network directly.
 - Legacy library present: migrate to unified SDK or introduce adapter boundary.
 - Gas optimization: Solidity optimization patterns (storage packing, assembly).
@@ -62,10 +65,10 @@ When solving a VeChain task:
 ### 3. Implement with VeChain-specific correctness
 Always be explicit about:
 - network + node URL (mainnet/testnet/solo)
-- fee payer + gas estimation
+- fee payer + gas estimation + fee delegation setup
 - multi-clause transaction structure where beneficial
-- fee delegation setup (VIP-191 or MPP)
 - dual-token awareness (VET for value, VTHO for gas)
+- social login considerations (smart accounts, mandatory fee delegation)
 - EVM version compatibility (paris)
 
 ### 4. Add tests
@@ -80,7 +83,7 @@ When you implement changes, provide:
 - a short "risk notes" section for anything touching signing/fees/contract interactions/token transfers
 
 ## Progressive disclosure (read when needed)
-- UI + wallet + hooks: [frontend-dapp-kit.md](frontend-dapp-kit.md)
+- UI + wallet + hooks: [frontend-vechain-kit.md](frontend-vechain-kit.md)
 - Connex/DevKit migration: [sdk-migration.md](sdk-migration.md)
 - Smart contracts: [smart-contracts.md](smart-contracts.md)
 - Gas optimization: [smart-contracts-optimization.md](smart-contracts-optimization.md)
