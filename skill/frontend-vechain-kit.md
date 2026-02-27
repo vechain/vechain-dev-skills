@@ -250,6 +250,15 @@ function TransactionComponent() {
 
 **Critical**: Pre-fetch all data before calling `sendTransaction`. Fetching during submission can trigger browser pop-up blockers for social login users.
 
+**Per-transaction delegation**: Override fee delegation for specific transactions:
+```tsx
+// App sponsors this transaction
+await sendTransaction(clauses, 'https://your-delegator.com/delegate');
+
+// User pays via Generic Delegator (default)
+await sendTransaction(clauses);
+```
+
 ### useTransferVET / useTransferERC20 -- Convenience Hooks
 
 ```tsx
@@ -453,11 +462,15 @@ Both VeChain Kit and DIY approaches require a [Privy](https://privy.io) account.
 >
 ```
 
-### Fee Delegation is Mandatory for Social Login
-Social login users cannot hold VTHO. Configure a delegation service:
+### Fee Delegation for Social Login
+VeChain Kit v2 auto-enables the **Generic Delegator** by default -- users pay their own gas in VET, VTHO, or B3TR. No `feeDelegation` config is required.
+
+To improve UX, you can optionally sponsor transactions so users pay nothing:
 ```tsx
 <VeChainKitProvider feeDelegation={{ delegatorUrl: 'https://your-delegator.com/delegate' }}>
 ```
+
+See [fee-delegation.md](fee-delegation.md) for Generic Delegator gas estimation, per-transaction sponsorship, and vechain.energy setup.
 
 ### Pre-fetch Data Before Transactions
 Fetching during `sendTransaction` blocks popups for social login:

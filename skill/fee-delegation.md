@@ -4,11 +4,9 @@
 
 Use when the user asks about:
 - Gasless transactions (users don't pay VTHO)
-- Sponsored transactions
-- Fee abstraction for onboarding
-- Meta-transactions on VeChain
-- VIP-191 designated gas payer
-- Social login fee sponsorship (mandatory for social login users)
+- Sponsored transactions, fee abstraction for onboarding
+- Meta-transactions on VeChain, VIP-191 designated gas payer
+- Generic Delegator, gas estimation, transaction cost
 
 ## VIP-191: Designated Gas Payer
 
@@ -101,22 +99,66 @@ const provider = new VeChainProvider(
 const signer = await provider.getSigner(senderAddress);
 ```
 
-### Frontend: Fee Delegation via VeChain Kit (preferred)
+### Frontend: Fee Delegation via VeChain Kit
 
-Configure `feeDelegation` in the provider -- all transactions are automatically delegated:
+VeChain Kit v2 has two fee delegation modes:
+
+#### 1. Generic Delegator (default -- no cost to app owner)
+
+VeChain Kit auto-enables the Generic Delegator when social login (Privy) or VeChain/ecosystem login is detected. **No configuration needed** -- users pay their own gas fees using VET, VTHO, or B3TR tokens. The app owner pays nothing.
+
+Default gas token priority: VET → B3TR → VTHO. Users can change this in the VeChain Kit settings UI.
+
+#### 2. App-Sponsored Delegation (app owner pays VTHO)
+
+To sponsor transactions yourself, configure a `delegatorUrl`:
 
 ```tsx
 <VeChainKitProvider
   feeDelegation={{
     delegatorUrl: 'https://your-delegator.com/delegate',
-    delegateAllTransactions: true, // Sponsor all users, not just social login
+    delegateAllTransactions: true, // true = all users, false = social login only
   }}
 >
 ```
 
-No extra code needed in `useSendTransaction` -- delegation happens automatically via provider config. See [frontend-vechain-kit.md](frontend-vechain-kit.md) for full `useSendTransaction` API.
+#### Per-Transaction Sponsorship Control
 
-**Important**: Fee delegation is **mandatory** for social login users (they cannot hold VTHO).
+Override delegation on individual transactions via the `delegationUrl` parameter:
+
+```tsx
+const { sendTransaction } = useSendTransaction({
+  signerAccountAddress: account?.address ?? '',
+});
+
+// Sponsor this specific transaction
+await sendTransaction(clauses, 'https://your-delegator.com/delegate');
+
+// Or let the user pay (Generic Delegator)
+await sendTransaction(clauses);
+```
+
+#### Gas Estimation (Generic Delegator)
+
+When using the Generic Delegator, show users what they'll pay before confirming:
+
+```tsx
+import { useGenericDelegatorFeeEstimation } from '@vechain/vechain-kit';
+
+const { data: estimation } = useGenericDelegatorFeeEstimation({
+  clauses,
+  tokens: ['VET', 'B3TR', 'VTHO'],  // Priority order
+});
+// estimation: { estimatedGas, transactionCost, serviceFee, totalGasUsed, usedToken }
+```
+
+#### Transaction Fee UX (Generic Delegator)
+
+When using the Generic Delegator, implement these alerts:
+- **Transaction confirmation**: Show the exact amount of VET/VTHO/B3TR that will be deducted
+- **Insufficient funds**: Alert if the user lacks balance to cover fees, with the required amount
+
+See [frontend-vechain-kit.md](frontend-vechain-kit.md) for full `useSendTransaction` API.
 
 ### Frontend: Fee Delegation via dapp-kit
 
@@ -214,12 +256,16 @@ For quick setup without building your own service:
 
 ## UX and Security Checklist
 
+**App-sponsored delegation:**
 - Always show the user that their transaction is sponsored (no hidden fees)
 - Rate-limit sponsorship to prevent abuse
 - Whitelist contracts and functions eligible for sponsorship
 - Monitor VTHO balance of the gas payer account
 - Set reasonable gas limits to prevent griefing
 - Log all sponsored transactions for auditing
-- Consider time-limited sponsorship for promotional campaigns
-- Handle delegation service downtime gracefully (fallback to user-paid)
-- For social login users: fee delegation is mandatory, ensure your service is always available
+- Handle delegation service downtime gracefully
+
+**Generic Delegator (user-paid):**
+- Show transaction cost estimate before confirmation (use `useGenericDelegatorFeeEstimation`)
+- Alert users when they have insufficient balance for fees
+- Sponsoring transactions via app-sponsored delegation is still recommended to improve UX

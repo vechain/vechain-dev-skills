@@ -48,7 +48,7 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 - Gas: estimate first, use fee delegation where appropriate
 - Transactions: use multi-clause when batching benefits atomicity or UX
 - Tokens: VET for value, VTHO for gas (dual-token model)
-- Social login: requires fee delegation (mandatory), smart accounts, pre-fetch data before `sendTransaction`
+- Social login: Generic Delegator auto-enabled (users pay gas in VET/VTHO/B3TR); app-sponsored delegation optional for better UX; smart accounts; pre-fetch data before `sendTransaction`
 
 ### 5. Test
 - Unit: Hardhat + Thor Solo
