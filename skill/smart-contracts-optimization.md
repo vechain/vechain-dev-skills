@@ -1,7 +1,8 @@
 # Smart Contract Gas Optimization on VeChainThor
 
-## When to Optimize
-Use these patterns when you need:
+## When to use
+
+Use when the user needs:
 - **Lower VTHO costs**: Reduce gas consumption for frequently-called functions
 - **Efficient storage**: Minimize storage slots for cost-critical contracts
 - **High-throughput contracts**: Maximize operations per transaction

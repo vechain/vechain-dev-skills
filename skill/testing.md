@@ -1,5 +1,9 @@
 # Testing Strategy (Hardhat / Thor Solo)
 
+## When to use
+
+Use when the user asks about: testing, Thor Solo, Docker, CI/CD, test fixtures, test patterns.
+
 ## Testing Pyramid
 
 1. **Unit tests (fast)**: Hardhat with in-memory EVM or Thor Solo

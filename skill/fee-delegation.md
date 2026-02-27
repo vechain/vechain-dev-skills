@@ -1,7 +1,8 @@
 # Fee Delegation (VIP-191 / MPP)
 
-## When fee delegation is in scope
-Use this guidance when the user asks about:
+## When to use
+
+Use when the user asks about:
 - Gasless transactions (users don't pay VTHO)
 - Sponsored transactions
 - Fee abstraction for onboarding
@@ -112,38 +113,20 @@ const signer = await provider.getSigner(senderAddress);
 
 ### Frontend: Fee Delegation via VeChain Kit (preferred)
 
-VeChain Kit handles fee delegation automatically when configured in the provider:
+Configure `feeDelegation` in the provider -- all transactions are automatically delegated:
 
 ```tsx
-// In VeChainKitProvider setup
 <VeChainKitProvider
   feeDelegation={{
     delegatorUrl: 'https://your-delegator.com/delegate',
     delegateAllTransactions: true, // Sponsor all users, not just social login
   }}
 >
-
-// Transactions are automatically delegated -- no extra code needed
-import { useSendTransaction, useWallet } from '@vechain/vechain-kit';
-
-function DelegatedTransaction() {
-  const { account } = useWallet();
-  const { sendTransaction, status } = useSendTransaction({
-    signerAccountAddress: account?.address ?? '',
-  });
-
-  const handleSend = async () => {
-    // Fee delegation happens automatically via provider config
-    await sendTransaction([
-      { to: '0x...', value: '0x0', data: encodedCallData, comment: 'Sponsored action' },
-    ]);
-  };
-
-  return <button onClick={handleSend}>Send (Gasless)</button>;
-}
 ```
 
-**Important**: Fee delegation is **mandatory** for social login users since they cannot hold VTHO directly.
+No extra code needed in `useSendTransaction` -- delegation happens automatically via provider config. See [frontend-vechain-kit.md](frontend-vechain-kit.md) for full `useSendTransaction` API.
+
+**Important**: Fee delegation is **mandatory** for social login users (they cannot hold VTHO).
 
 ### Frontend: Fee Delegation via dapp-kit
 

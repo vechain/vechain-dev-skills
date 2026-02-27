@@ -1,8 +1,8 @@
 # VeBetterDAO (X2Earn Sustainability Apps)
 
-## When to use this guidance
+## When to use
 
-Use this guidance when the user asks about:
+Use when the user asks about:
 
 - Building X2Earn or sustainability-rewarding apps
 - Distributing B3TR token rewards to users

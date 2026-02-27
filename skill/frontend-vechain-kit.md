@@ -1,5 +1,9 @@
 # Frontend with VeChain Kit (Next.js / React)
 
+## When to use
+
+Use when the user asks about: VeChain Kit, dapp-kit, wallet connection, social login, hooks, components, WalletButton, TransactionModal, provider setup, Turborepo architecture, Chakra UI, i18n.
+
 ## Choosing VeChain Kit vs dapp-kit
 
 | Criteria | VeChain Kit | dapp-kit |
@@ -114,7 +118,7 @@ Then wrap `app/layout.tsx` with `<Providers>`.
 | Method | Description | Requires Privy |
 |--------|-------------|----------------|
 | `vechain` | Login with VeChain (cross-app Privy) | No |
-| `dappkit` | VeWorld, Sync2, WalletConnect | No |
+| `dappkit` | VeWorld, WalletConnect | No |
 | `ecosystem` | Cross-app ecosystem login | No |
 | `email` | Email-based login | Yes |
 | `passkey` | Biometric/passkey login | Yes |

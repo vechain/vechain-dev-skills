@@ -1,8 +1,8 @@
 # StarGate (NFT-Based Staking & Delegation)
 
-## When to use this guidance
+## When to use
 
-Use this guidance when the user asks about:
+Use when the user asks about:
 
 - Staking VET on VeChain
 - StarGate NFTs and node tiers

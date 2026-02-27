@@ -1,4 +1,8 @@
-# Connex / Thor DevKit -> SDK Migration (boundary patterns)
+# Connex / Thor DevKit -> SDK Migration
+
+## When to use
+
+Use when the user has Connex, thor-devkit, web3-providers-connex, or @vechain/hardhat-vechain in their project, or asks about migrating from deprecated VeChain packages.
 
 ## The rule
 - New code: `@vechain/sdk-core` + `@vechain/sdk-network` types and APIs.

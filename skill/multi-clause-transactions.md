@@ -1,8 +1,8 @@
 # Multi-Clause Transactions
 
-## When to use this guidance
+## When to use
 
-Use this guidance when the user asks about:
+Use when the user asks about:
 
 - Batching multiple operations in one transaction
 - Atomic multi-step operations
@@ -133,47 +133,23 @@ const [totalSupply, name, symbol, decimals, balance] = results;
 
 ## Frontend Multi-Clause with VeChain Kit (preferred)
 
+Pass an array of clauses to `useSendTransaction` (see [frontend-vechain-kit.md](frontend-vechain-kit.md) for full hook API):
+
 ```tsx
-import { useSendTransaction, useWallet } from '@vechain/vechain-kit';
+const { sendTransaction } = useSendTransaction({
+    signerAccountAddress: account?.address ?? '',
+});
 
-function BatchOperation() {
-    const { account } = useWallet();
-    const { sendTransaction, status, txReceipt } = useSendTransaction({
-        signerAccountAddress: account?.address ?? '',
-    });
-
-    const handleBatch = async () => {
-        await sendTransaction([
-            // Clause 1: Transfer VET
-            {
-                to: '0xRecipient1...',
-                value: '0x' + (100e18).toString(16),
-                data: '0x',
-                comment: 'Send 100 VET to Recipient 1',
-            },
-            // Clause 2: Call contract
-            {
-                to: contractAddress,
-                value: '0x0',
-                data: encodedFunctionData,
-                comment: 'Execute contract action',
-                abi: contractFunctionABI,
-            },
-            // Clause 3: Transfer VET
-            {
-                to: '0xRecipient2...',
-                value: '0x' + (50e18).toString(16),
-                data: '0x',
-                comment: 'Send 50 VET to Recipient 2',
-            },
-        ]);
-    };
-
-    return <button onClick={handleBatch}>Execute Batch</button>;
-}
+const handleBatch = async () => {
+    await sendTransaction([
+        { to: '0xRecipient1...', value: '0x' + (100e18).toString(16), data: '0x', comment: 'Send 100 VET' },
+        { to: contractAddress, value: '0x0', data: encodedFunctionData, comment: 'Contract call', abi: contractFunctionABI },
+        { to: '0xRecipient2...', value: '0x' + (50e18).toString(16), data: '0x', comment: 'Send 50 VET' },
+    ]);
+};
 ```
 
-**Note**: `useSendTransaction` handles multi-clause for both wallet and social login users automatically. Social login users with V3 smart accounts use `executeBatchWithAuthorization` under the hood.
+Handles both wallet and social login users automatically. Social login V3 smart accounts use `executeBatchWithAuthorization` under the hood.
 
 ## Frontend Multi-Clause with dapp-kit
 

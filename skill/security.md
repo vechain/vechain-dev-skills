@@ -1,5 +1,9 @@
 # VeChain Smart Contract Security Checklist
 
+## When to use
+
+Use when the user asks about: security, audit, vulnerability review, reentrancy, access control, or when reviewing contract code.
+
 ## Core Principle
 
 Assume the attacker controls:

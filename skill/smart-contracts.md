@@ -1,11 +1,8 @@
 # Smart Contracts on VeChainThor (Solidity + Hardhat)
 
-## When to use Hardhat + VeChain plugin
-Use Hardhat with `@vechain/sdk-hardhat-plugin` by default when:
-- You want familiar Solidity development workflows
-- You need compilation, testing, and deployment in one tool
-- You want ethers.js-compatible contract interaction
-- You need VeChain-specific features (fee delegation, multi-clause)
+## When to use
+
+Use when the user asks about: Solidity contracts, Hardhat setup, deployment, ERC-20, ERC-721, contract interaction with SDK, built-in contracts, VeChainThor EVM.
 
 ## Core Advantages
 - **EVM Compatibility**: VeChainThor runs standard Solidity contracts
@@ -226,18 +223,8 @@ npx hardhat run scripts/deploy.ts --network vechain_mainnet
 ```
 
 ### Deploy with Fee Delegation
-Add a `delegate` config to the network:
-```typescript
-vechain_testnet_delegated: {
-  url: 'https://testnet.vechain.org',
-  accounts: { mnemonic: '...', count: 3, path: VET_DERIVATION_PATH },
-  delegate: {
-    url: 'https://sponsor-testnet.vechain.energy/by/YOUR_PROJECT_ID'
-  },
-  gas: 'auto',
-  gasPrice: 'auto'
-}
-```
+
+Add a `delegate` config to the network. See [fee-delegation.md](fee-delegation.md) for full setup.
 
 ## Contract Interaction with SDK
 
