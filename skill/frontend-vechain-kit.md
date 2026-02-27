@@ -30,7 +30,11 @@ For npm, use `npm install --legacy-peer-deps` instead.
 
 ### Provider Setup (Next.js App Router)
 
-VeChain Kit must be dynamically imported to prevent SSR issues:
+VeChain Kit must be dynamically imported to prevent SSR issues.
+
+**Without own Privy credentials (free shared Privy):**
+
+Use `vechain` for social login — it bundles all social methods (email, Google, passkey, etc.) through VeChain's shared Privy. You **cannot** use `email`, `google`, `passkey`, or `more` individually without your own Privy credentials — doing so will throw a configuration error.
 
 ```tsx
 // app/providers.tsx
@@ -53,12 +57,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         description: 'My VeChain dApp',
       }}
       loginMethods={[
-        { method: 'vechain', gridColumn: 4 },
+        { method: 'vechain', gridColumn: 4 },  // all social login via VeChain's Privy
         { method: 'dappkit', gridColumn: 4 },
-        { method: 'email', gridColumn: 2 },
-        { method: 'google', gridColumn: 2 },
-        { method: 'passkey', gridColumn: 2 },
-        { method: 'more', gridColumn: 2 },
       ]}
       feeDelegation={{
         delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL,
@@ -75,10 +75,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
         },
       }}
-      privy={{
-        appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '',
-        clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID ?? '',
-      }}
+      // No privy prop needed — uses VeChain's shared credentials
     >
       {children}
     </VeChainKitProvider>
@@ -86,19 +83,40 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
+**With own Privy credentials (better UX, pick individual methods):**
+
+```tsx
+<VeChainKitProvider
+  // ...same config as above, but with individual login methods and privy prop:
+  loginMethods={[
+    { method: 'email', gridColumn: 2 },
+    { method: 'google', gridColumn: 2 },
+    { method: 'passkey', gridColumn: 2 },
+    { method: 'more', gridColumn: 2 },
+    { method: 'dappkit', gridColumn: 4 },
+  ]}
+  privy={{
+    appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '',
+    clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID ?? '',
+  }}
+>
+```
+
 Then wrap `app/layout.tsx` with `<Providers>`.
 
 ### Login Methods
 
-| Method | Description | Requires Privy |
-|--------|-------------|----------------|
-| `vechain` | Login with VeChain's shared Privy (free, slightly worse UX) | No |
+| Method | Description | Requires own Privy credentials |
+|--------|-------------|-------------------------------|
+| `vechain` | All social login via VeChain's shared Privy (free, slightly worse UX — VeChain branding, extra redirect) | No |
 | `dappkit` | VeWorld, WalletConnect | No |
 | `ecosystem` | Cross-app ecosystem login | No |
-| `email` | Email-based login | Yes |
-| `passkey` | Biometric/passkey login | Yes |
-| `google` | Google OAuth | Yes |
-| `more` | Additional OAuth providers | Yes |
+| `email` | Email-based login | **Yes** — must pass `privy` prop |
+| `passkey` | Biometric/passkey login | **Yes** — must pass `privy` prop |
+| `google` | Google OAuth | **Yes** — must pass `privy` prop |
+| `more` | Additional OAuth providers | **Yes** — must pass `privy` prop |
+
+**Important:** Using `email`, `google`, `passkey`, or `more` without the `privy` prop will throw: _"Login methods require Privy configuration. Please either remove these methods or configure the privy prop."_ Use `vechain` instead for free social login, or provide your own Privy credentials.
 
 ---
 
@@ -438,7 +456,9 @@ openProfile({ isolatedView: true }); // Prevent navigation to other kit sections
 There are two options for enabling social login:
 
 **Option A: Use VeChain's shared Privy account (free, no setup)**
-VeChain Kit works with social login out of the box — no Privy account needed. If you omit the `privy` prop, VeChain Kit uses VeChain's own Privy credentials via cross-app connect. This is free and provides all social login methods (`vechain`, `email`, `passkey`, `google`, etc.), but the UX is slightly worse: users see VeChain's branding in the Privy modal instead of your app's, and the login flow includes an extra cross-app redirect step.
+VeChain Kit works with social login out of the box — no Privy account needed. If you omit the `privy` prop, VeChain Kit uses VeChain's own Privy credentials via cross-app connect. Use `{ method: 'vechain' }` in `loginMethods` to enable this. This is free and provides all social login methods (email, Google, passkey, etc.) bundled under a single entry point, but the UX is slightly worse: users see VeChain's branding in the Privy modal instead of your app's, and the login flow includes an extra cross-app redirect step.
+
+**You cannot use individual social methods (`email`, `google`, `passkey`, `more`) with the free shared option.** Those methods require your own Privy credentials (Option B). Using them without the `privy` prop will throw a configuration error.
 
 **Option B: Use your own Privy account (better UX)**
 Create an app at [privy.io](https://privy.io), retrieve your **App ID** and **Client ID** from the App Settings tab, and pass them to `VeChainKitProvider` (see [setup guide](https://docs.vechainkit.vechain.org/quickstart/setup-privy-optional)):

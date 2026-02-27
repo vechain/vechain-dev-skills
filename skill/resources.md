@@ -66,6 +66,32 @@ claude mcp add --transport http vechain-docs https://vechain.mcp.kapa.ai
 - [Theming](https://docs.vechainkit.vechain.org/customization/theming)
 - [@vechain/vechain-kit npm](https://www.npmjs.com/package/@vechain/vechain-kit)
 
+### VeChain Kit Docs MCP Server
+
+The VeChain Kit documentation site exposes a GitBook-powered MCP server for AI tools. It provides read-only search and retrieval of the latest published docs — useful for looking up hooks, components, configuration, and social login details directly from your AI editor.
+
+**Endpoint:** `https://docs.vechainkit.vechain.org/~gitbook/mcp`
+
+**Transport:** HTTP only (no stdio or SSE).
+
+**Claude Code setup:**
+```bash
+claude mcp add --transport http vechain-kit-docs https://docs.vechainkit.vechain.org/~gitbook/mcp
+```
+
+**Cursor / VS Code (`mcp.json`):**
+```json
+{
+  "servers": {
+    "vechain-kit-docs": {
+      "url": "https://docs.vechainkit.vechain.org/~gitbook/mcp"
+    }
+  }
+}
+```
+
+This complements the `@vechain/mcp-server` (which provides blockchain data + multi-site docs search) with direct, always-up-to-date access to the VeChain Kit documentation specifically.
+
 ## Smart Accounts (Account Abstraction)
 - [Smart Accounts GitHub](https://github.com/vechain/smart-accounts) (official SimpleAccount + SimpleAccountFactory)
 - [Smart Accounts Documentation](https://docs.vechainkit.vechain.org/social-login/smart-accounts)
