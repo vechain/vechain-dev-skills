@@ -11,17 +11,22 @@ See [frontend.md](frontend.md) for choosing VeChain Kit vs dapp-kit, React Query
 ## Setup
 
 ### Installation
+
+**Important:** VeChain Kit requires `--legacy-peer-deps` due to peer dependency conflicts.
+
 ```bash
-yarn add @vechain/vechain-kit
+yarn add --legacy-peer-deps @vechain/vechain-kit
 
 # Required peer dependencies
-yarn add @chakra-ui/react@^2.8.2 \
+yarn add --legacy-peer-deps @chakra-ui/react@^2.8.2 \
   @emotion/react@^11.14.0 \
   @emotion/styled@^11.14.0 \
   @tanstack/react-query@^5.64.2 \
   @vechain/dapp-kit-react@2.1.0-rc.1 \
   framer-motion@^11.15.0
 ```
+
+For npm, use `npm install --legacy-peer-deps` instead.
 
 ### Provider Setup (Next.js App Router)
 
@@ -87,7 +92,7 @@ Then wrap `app/layout.tsx` with `<Providers>`.
 
 | Method | Description | Requires Privy |
 |--------|-------------|----------------|
-| `vechain` | Login with VeChain (cross-app Privy) | No |
+| `vechain` | Login with VeChain's shared Privy (free, slightly worse UX) | No |
 | `dappkit` | VeWorld, WalletConnect | No |
 | `ecosystem` | Cross-app ecosystem login | No |
 | `email` | Email-based login | Yes |
@@ -430,9 +435,13 @@ openProfile({ isolatedView: true }); // Prevent navigation to other kit sections
 
 ### Privy Setup (Required for Social Login)
 
-Both VeChain Kit and DIY approaches require a [Privy](https://privy.io) account. Create an app at privy.io, then:
-- Retrieve your **App ID** and **Client ID** from the App Settings tab
-- For VeChain Kit: pass them as props to `VeChainKitProvider` (see [setup guide](https://docs.vechainkit.vechain.org/quickstart/setup-privy-optional)):
+There are two options for enabling social login:
+
+**Option A: Use VeChain's shared Privy account (free, no setup)**
+VeChain Kit works with social login out of the box — no Privy account needed. If you omit the `privy` prop, VeChain Kit uses VeChain's own Privy credentials via cross-app connect. This is free and provides all social login methods (`vechain`, `email`, `passkey`, `google`, etc.), but the UX is slightly worse: users see VeChain's branding in the Privy modal instead of your app's, and the login flow includes an extra cross-app redirect step.
+
+**Option B: Use your own Privy account (better UX)**
+Create an app at [privy.io](https://privy.io), retrieve your **App ID** and **Client ID** from the App Settings tab, and pass them to `VeChainKitProvider` (see [setup guide](https://docs.vechainkit.vechain.org/quickstart/setup-privy-optional)):
 ```tsx
 <VeChainKitProvider
   privy={{
@@ -441,6 +450,7 @@ Both VeChain Kit and DIY approaches require a [Privy](https://privy.io) account.
   }}
 >
 ```
+This gives your app its own branding in the login modal and a smoother single-step login flow.
 
 ### Fee Delegation for Social Login
 VeChain Kit v2 auto-enables the **Generic Delegator** by default -- users pay their own gas in VET, VTHO, or B3TR. No `feeDelegation` config is required.
