@@ -1,46 +1,16 @@
-# Frontend with VeChain Kit (Next.js / React)
+# VeChain Kit (React / Next.js)
 
 ## When to use
 
-Use when the user asks about: VeChain Kit, dapp-kit, wallet connection, social login, hooks, components, WalletButton, TransactionModal, provider setup, Turborepo architecture, Chakra UI, i18n.
+Use when the user asks about: VeChain Kit, useWallet, useSendTransaction, useCallClause, WalletButton, TransactionModal, provider setup, social login, Privy, smart accounts, account abstraction, theming.
 
-## Choosing VeChain Kit vs dapp-kit
-
-| Criteria | VeChain Kit | dapp-kit |
-|----------|-------------|----------|
-| **Best for** | Full-featured dApps | Lightweight wallet-only |
-| **Frameworks** | React, Next.js only | React, Next, Vue, Svelte, Angular |
-| **Social login** | Yes (Privy, built-in) | DIY only (complex, see below) |
-| **Pre-built UI** | WalletButton, modals, transaction UI | Minimal (WalletButton only) |
-| **Transaction hooks** | useSendTransaction, useTransferVET, useTransferERC20 | None (use SDK directly) |
-| **Contract read hooks** | useCallClause (React Query-based) | None |
-| **Token management** | Built-in (balances, swaps, transfers) | Manual |
-| **Smart accounts** | Yes (account abstraction) | No |
-| **VET domains** | Built-in hooks | Basic |
-| **Bundle size** | Larger | Smaller |
-| **i18n** | Built-in | No |
-
-**Rule of thumb**: Use VeChain Kit unless bundle size is critical or you need non-React framework support.
-See [Should I Use It?](https://docs.vechainkit.vechain.org/discover-vechain-kit/should-i-use-it) for details.
+See [frontend.md](frontend.md) for choosing VeChain Kit vs dapp-kit, React Query patterns, Turborepo architecture, and shared frontend conventions.
 
 ---
 
-## VeChain Kit Setup
+## Setup
 
-### Quick Start (Template)
-```bash
-npx create-vechain-dapp@latest
-```
-
-Available templates:
-| Template | Description |
-|----------|-------------|
-| **X2Earn** | Monorepo (Turbo) with React frontend, Express.js backend, Hardhat contracts, ChatGPT image recognition, VeBetterDAO integrations |
-| **Simple Dapp** | Monorepo (Turbo) with React + Hardhat. Available in VeChain Kit or DAppKit variants |
-| **Buy Me Coffee** | Guided tutorial: build a complete dApp with smart contract integration |
-| **Smart Contract** | Hardhat-only template for contract development without frontend |
-
-### Manual Installation
+### Installation
 ```bash
 yarn add @vechain/vechain-kit
 
@@ -134,6 +104,8 @@ All hooks use TanStack Query (React Query) and return a consistent shape:
 { data, isLoading, isError, error, refetch, isRefetching }
 ```
 
+See [frontend.md](frontend.md) for React Query caching, invalidation, and loading state patterns.
+
 ### useWallet -- Connection State
 
 ```tsx
@@ -180,7 +152,7 @@ export const useTokenBalance = (address: string) => {
 // In a component
 function Balance({ address }: { address: string }) {
   const { data, isLoading } = useTokenBalance(address);
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Skeleton height="20px" width="100px" />;
   return <div>Balance: {data?.toString()}</div>;
 }
 ```
@@ -210,9 +182,11 @@ src/api/contracts/
 
 ```tsx
 import { useSendTransaction, useWallet } from '@vechain/vechain-kit';
+import { useQueryClient } from '@tanstack/react-query';
 
 function TransactionComponent() {
   const { account } = useWallet();
+  const queryClient = useQueryClient();
 
   const {
     sendTransaction,
@@ -224,6 +198,12 @@ function TransactionComponent() {
   } = useSendTransaction({
     signerAccountAddress: account?.address ?? '',
     // gasPadding: 0.2,  // Optional: 20% gas buffer
+    onTxConfirmed: () => {
+      // Invalidate affected queries after successful transaction
+      queryClient.invalidateQueries({
+        queryKey: getCallClauseQueryKey(CONTRACT, 'balanceOf', [account?.address]),
+      });
+    },
   });
 
   const handleSend = async () => {
@@ -534,86 +514,6 @@ See [Smart Accounts documentation](https://docs.vechainkit.vechain.org/social-lo
 
 ---
 
-## Common Project Architecture (Turborepo)
-
-Many VeChain dApps use a Turborepo monorepo. When the project follows this structure, respect these conventions:
-
-```
-root/
-├── apps/
-│   └── frontend/          # Next.js App Router
-│       └── src/
-│           ├── api/
-│           │   ├── contracts/  # Contract read hooks (useCallClause wrappers)
-│           │   └── indexer/    # Indexer/API query hooks
-│           ├── app/            # Next.js App Router pages
-│           └── components/
-├── packages/
-│   ├── contracts/          # Hardhat smart contracts
-│   ├── config/             # Shared config (ESLint, TS, etc.)
-│   ├── utils/              # Shared utilities
-│   └── constants/          # Shared constants, addresses, ABIs
-├── turbo.json
-└── package.json
-```
-
-**Apply these conventions only when the project actually uses this structure.** Check for `turbo.json` or `"turbo"` in the root `package.json` to confirm.
-
-### API Layer Convention
-When the project has `src/api/contracts/`:
-- Place each contract read hook in its own file (e.g., `useTokenBalance.ts`)
-- Export all hooks from `src/api/contracts/index.ts`
-- Indexer queries go in `src/api/indexer/`
-
-### useThor (not useConnex)
-`useConnex` is deprecated everywhere (including dapp-kit v2). Always use `useThor`:
-
-```tsx
-// VeChain Kit
-import { useThor } from '@vechain/vechain-kit';
-
-// dapp-kit v2
-import { useThor } from '@vechain/dapp-kit-react';
-
-const thor = useThor();
-```
-
----
-
-## State Management Pattern
-
-When the project uses React Query + Zustand:
-- **Server state** (contract reads, indexer data): React Query via `useCallClause` or custom `useQuery` hooks
-- **Client state** (UI state, form state, toggles): Zustand stores
-- Never duplicate server state in Zustand -- let React Query be the source of truth
-
----
-
-## Chakra UI Integration
-
-When the project uses Chakra UI:
-- VeChain Kit's peer dependency is `@chakra-ui/react@^2.8.2`
-- Define theme in a central file (e.g., `src/app/theme/theme.ts`)
-- Use component recipes for consistent styling (button.ts, card.ts, etc.)
-- **Mobile-first**: design for small viewports first, add `md`/`lg` breakpoints for larger screens
-- Use responsive props: `<Box p={{ base: 4, md: 8 }}>`
-
----
-
-## i18n with react-i18next
-
-When the project uses internationalization:
-- Use `react-i18next` with flat JSON key-value translation files
-- Interpolation: `{{variableName}}`
-- VeChain Kit has built-in i18n; sync language with `useCurrentLanguage`
-
-```tsx
-import { useCurrentLanguage } from '@vechain/vechain-kit';
-const { language, setLanguage } = useCurrentLanguage();
-```
-
----
-
 ## Theming
 
 ```tsx
@@ -629,46 +529,3 @@ const { language, setLanguage } = useCurrentLanguage();
 ```
 
 Minimal config: set `modal.backgroundColor` and `textColor` -- all other colors auto-derive.
-
----
-
-## dapp-kit Setup (Lightweight Alternative)
-
-Use `@vechain/dapp-kit-react` when VeChain Kit is too heavy:
-
-```bash
-npm install @vechain/dapp-kit-react
-```
-
-```tsx
-import { DAppKitProvider } from '@vechain/dapp-kit-react';
-
-<DAppKitProvider
-  nodeUrl="https://testnet.vechain.org/"
-  genesis="test"
-  usePersistence={true}
-  allowedWallets={['veworld', 'wallet-connect']}
->
-  <YourApp />
-</DAppKitProvider>
-```
-
-Hooks: `useWallet()`, `useThor()`, `useWalletModal()`, `useVechainDomain()`
-Components: `<WalletButton />`
-
-**Note**: dapp-kit has no transaction-sending hooks. Use `@vechain/sdk-network` for contract interaction and transaction submission.
-
----
-
-## Transaction UX Checklist
-
-* Disable inputs while a transaction is pending
-* Show transaction status via `TransactionModal` or `TransactionToast`
-* Provide a transaction ID immediately after signing
-* Track confirmation via `useTxReceipt`
-* Show actionable errors:
-  * user rejected signing (`UserRejectedError`)
-  * transaction reverted (`RevertReasonError` with reason)
-  * insufficient VET for transfer
-  * insufficient VTHO for gas fees
-* Handle fee delegation failures gracefully (fallback or clear error)

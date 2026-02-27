@@ -13,7 +13,7 @@ This skill provides Claude Code with deep knowledge of the current VeChain devel
 - **Smart Contracts**: Solidity with Hardhat + `@vechain/sdk-hardhat-plugin`
 - **Testing**: Hardhat testing with Thor Solo local node
 - **Codegen**: ABI-driven TypeChain client generation
-- **Unique Features**: Multi-clause transactions, fee delegation (VIP-191/MPP), social login
+- **Unique Features**: Multi-clause transactions, fee delegation (VIP-191), social login
 - **Security**: Comprehensive Solidity vulnerability patterns and prevention
 
 ## Installation
@@ -37,13 +37,15 @@ cd vechain-dev-skills
 ```
 skill/
 ├── SKILL.md                          # Main skill definition (required)
-├── frontend-vechain-kit.md           # UI patterns with VeChain Kit + dapp-kit
+├── frontend.md                       # Shared frontend patterns (React Query, Turborepo, state mgmt)
+├── frontend-vechain-kit.md           # VeChain Kit setup, hooks, components, social login
+├── frontend-dappkit.md               # dapp-kit setup and usage (lightweight alternative)
 ├── sdk-migration.md                  # Connex/Thor DevKit -> SDK migration
 ├── smart-contracts.md                # Solidity development with Hardhat
 ├── smart-contracts-optimization.md   # Gas optimization patterns
 ├── testing.md                        # Testing (Hardhat / Thor Solo)
 ├── abi-codegen.md                    # ABI and TypeChain client generation
-├── fee-delegation.md                 # Fee delegation (VIP-191 / MPP)
+├── fee-delegation.md                 # Fee delegation (VIP-191)
 ├── multi-clause-transactions.md      # Multi-clause transaction patterns
 ├── security.md                       # Security vulnerabilities & prevention
 ├── vebetterdao.md                    # VeBetterDAO / X2Earn sustainability apps
@@ -94,7 +96,7 @@ This skill encodes opinionated best practices:
 | Smart Contracts | Solidity + Hardhat | Foundry |
 | Local Node | Thor Solo (Docker) | Thor Solo (binary) |
 | Client Generation | TypeChain | Manual ABI wrappers |
-| Fee Abstraction | VIP-191 Designated Gas Payer | MPP (contract-level) |
+| Fee Abstraction | VIP-191 Designated Gas Payer | Generic Delegator (user-paid) |
 | Social Login | Privy (via VeChain Kit) | - |
 
 ## Content Sources

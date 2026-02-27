@@ -64,7 +64,9 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 
 | Topic | File | Load when user mentions... |
 |-------|------|---------------------------|
-| Frontend, hooks, components | [frontend-vechain-kit.md](frontend-vechain-kit.md) | VeChain Kit, dapp-kit, useWallet, useSendTransaction, WalletButton, provider setup, Turborepo, Chakra, i18n, social login, Privy, smart accounts, account abstraction |
+| Frontend patterns (shared) | [frontend.md](frontend.md) | frontend, React Query, caching, query keys, loading, skeleton, Turborepo, Chakra, i18n, state management |
+| VeChain Kit | [frontend-vechain-kit.md](frontend-vechain-kit.md) | VeChain Kit, useWallet, useSendTransaction, useCallClause, WalletButton, TransactionModal, social login, Privy, smart accounts, account abstraction, theming |
+| dapp-kit | [frontend-dappkit.md](frontend-dappkit.md) | dapp-kit, DAppKitProvider, lightweight wallet |
 | Legacy migration | [sdk-migration.md](sdk-migration.md) | Connex, thor-devkit, migration, deprecated |
 | Smart contracts | [smart-contracts.md](smart-contracts.md) | Solidity, Hardhat, ERC-20, ERC-721, deploy, contract interaction |
 | Gas optimization | [smart-contracts-optimization.md](smart-contracts-optimization.md) | gas, optimize, storage packing, assembly, unchecked |
