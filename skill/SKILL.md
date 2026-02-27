@@ -68,7 +68,7 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 | VeChain Kit | [frontend-vechain-kit.md](frontend-vechain-kit.md) | VeChain Kit, useWallet, useSendTransaction, useCallClause, WalletButton, TransactionModal, social login, Privy, smart accounts, account abstraction, theming |
 | dapp-kit | [frontend-dappkit.md](frontend-dappkit.md) | dapp-kit, DAppKitProvider, lightweight wallet |
 | Legacy migration | [sdk-migration.md](sdk-migration.md) | Connex, thor-devkit, migration, deprecated |
-| Smart contracts | [smart-contracts.md](smart-contracts.md) | Solidity, Hardhat, ERC-20, ERC-721, deploy, contract interaction |
+| Smart contracts | [smart-contracts.md](smart-contracts.md) | Solidity, Hardhat, ERC-20, ERC-721, deploy, contract interaction, libraries, contract size, upgradeable |
 | Gas optimization | [smart-contracts-optimization.md](smart-contracts-optimization.md) | gas, optimize, storage packing, assembly, unchecked |
 | Testing | [testing.md](testing.md) | test, Thor Solo, Docker, CI, fixtures |
 | ABI / codegen | [abi-codegen.md](abi-codegen.md) | TypeChain, ABI, typechain-types, code generation |

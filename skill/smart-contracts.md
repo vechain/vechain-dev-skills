@@ -2,7 +2,7 @@
 
 ## When to use
 
-Use when the user asks about: Solidity contracts, Hardhat setup, deployment, ERC-20, ERC-721, contract interaction with SDK, built-in contracts, VeChainThor EVM.
+Use when the user asks about: Solidity contracts, Hardhat setup, deployment, ERC-20, ERC-721, contract interaction with SDK, built-in contracts, VeChainThor EVM, libraries, contract size, upgradeable contracts.
 
 ## Core Advantages
 - **EVM Compatibility**: VeChainThor runs standard Solidity contracts
@@ -191,6 +191,157 @@ contract MyUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
 ```
+
+## Solidity Libraries
+
+**Always prefer libraries** to keep contracts maintainable and under the 24KB contract size limit. Extract reusable or isolatable logic into libraries early.
+
+### When to Use Libraries
+
+- **Contract size**: Near the 24KB limit (check with `npx hardhat compile`)
+- **Reuse**: Logic shared across contracts or that can be isolated
+- **Readability**: Split large contracts into a main contract plus focused "Utils" libraries
+
+### Two Kinds of Libraries
+
+**A) Storage-types library (not deployed)**
+
+Holds storage structs and `internal` getters that return `storage` via a fixed slot (ERC-7201). No `external` functions -- compiled into the contract, not deployed separately.
+
+```solidity
+// contracts/my-module/libraries/MyModuleStorageTypes.sol
+library MyModuleStorageTypes {
+    /// @custom:storage-location erc7201:mymodule.storage.main
+    struct MainStorage {
+        mapping(bytes32 => uint256) values;
+        uint256 counter;
+    }
+
+    bytes32 private constant MainStorageLocation =
+        0x...; // keccak256(abi.encode(uint256(keccak256("mymodule.storage.main")) - 1)) & ~bytes32(uint256(0xff))
+
+    function _getMainStorage() internal pure returns (MainStorage storage s) {
+        bytes32 location = MainStorageLocation;
+        assembly { s.slot := location }
+    }
+}
+```
+
+**B) Utils libraries (deployed and linked)**
+
+Contain `external` functions with real logic. Read/write the same storage as the main contract via the storage-types library. Deployed separately; main contract calls them as `LibraryName.functionName(...)`.
+
+```solidity
+// contracts/my-module/libraries/ValidationUtils.sol
+library ValidationUtils {
+    error InvalidInput(bytes32 id);
+
+    function validate(bytes32 id) external view returns (bool) {
+        MyModuleStorageTypes.MainStorage storage s = MyModuleStorageTypes._getMainStorage();
+        if (s.values[id] == 0) revert InvalidInput(id);
+        return true;
+    }
+}
+```
+
+### Project Layout
+
+```
+contracts/
+├── my-module/
+│   ├── MyModule.sol                    # Main contract (thin facade)
+│   └── libraries/
+│       ├── MyModuleStorageTypes.sol     # Storage structs + internal slot getters (not deployed)
+│       ├── ValidationUtils.sol         # External logic library (deployed)
+│       └── ProcessingUtils.sol         # External logic library (deployed)
+├── libraries/
+│   └── SharedDataTypes.sol             # Types shared across modules
+└── interfaces/
+    └── IMyModule.sol
+```
+
+### Main Contract Pattern
+
+```solidity
+import "./libraries/MyModuleStorageTypes.sol";
+import "./libraries/ValidationUtils.sol";
+import "./libraries/ProcessingUtils.sol";
+
+contract MyModule is Initializable, UUPSUpgradeable, AccessControlUpgradeable {
+    using MyModuleStorageTypes for *;
+
+    function doSomething(bytes32 id) external onlyRole(OPERATOR_ROLE) {
+        ValidationUtils.validate(id);       // Delegated to library
+        ProcessingUtils.process(id);        // Delegated to library
+    }
+}
+```
+
+- Access control and modifiers stay in the main contract
+- Libraries only get storage and do the logic
+- No `using` for deployed (external) libraries -- call directly
+
+### Deployment with Library Linking
+
+Deploy Utils libraries first, then link them when deploying the main contract:
+
+```typescript
+// scripts/libraries/myModuleLibraries.ts
+export async function deployMyModuleLibraries() {
+  const ValidationUtils = await ethers.deployContract('ValidationUtils');
+  await ValidationUtils.waitForDeployment();
+
+  const ProcessingUtils = await ethers.deployContract('ProcessingUtils');
+  await ProcessingUtils.waitForDeployment();
+
+  return {
+    ValidationUtils: await ValidationUtils.getAddress(),
+    ProcessingUtils: await ProcessingUtils.getAddress(),
+  };
+}
+
+// scripts/deploy.ts
+const libs = await deployMyModuleLibraries();
+
+const MyModule = await ethers.getContractFactory('MyModule', {
+  libraries: {
+    ValidationUtils: libs.ValidationUtils,
+    ProcessingUtils: libs.ProcessingUtils,
+  },
+});
+```
+
+Use the **same** `libraries` object for both deploy and upgrade of the implementation.
+
+### Upgrade Rules
+
+- **Redeploy all libraries** when upgrading the main contract version
+- Pass the new library addresses in `options.libraries` to `upgradeProxy`
+- For upgrade tests, keep deprecated contract/library versions under `contracts/deprecated/V{N}/` so you can deploy V(N-1) and upgrade to V(N)
+
+### Storage Safety
+
+- **Never** change order, remove, or change types of existing storage variables
+- Only **append** new fields at the end of storage structs
+- This applies to both the storage-types library and the main contract
+
+### Library Style
+
+- Use **custom errors** (e.g., `error NonexistentItem(bytes32 id);`)
+- Emit **events** in the library when the event is part of the module's API
+- Use NatSpec (`@title`, `@dev`) on each library and public/external functions
+- Keep imports minimal and directional (e.g., `../../interfaces/`, `./StorageTypes.sol`)
+
+### Quick Checklist for Adding a New Utils Library
+
+1. Create `contracts/<module>/libraries/<Name>Utils.sol` with `external` functions
+2. Access storage only via the module's storage-types library
+3. Add to the module's library deployment script and include in the returned object
+4. Add library name + address to the `libraries` map for `getContractFactory`
+5. Import in the main contract and call `NewUtils.functionName(...)`
+6. Do not add or change storage layout in the main contract -- keep new storage in the storage-types library, append only
+
+---
 
 ## Deployment
 
