@@ -66,6 +66,12 @@ claude mcp add --transport http vechain-docs https://vechain.mcp.kapa.ai
 - [Theming](https://docs.vechainkit.vechain.org/customization/theming)
 - [@vechain/vechain-kit npm](https://www.npmjs.com/package/@vechain/vechain-kit)
 
+## Smart Accounts (Account Abstraction)
+- [Smart Accounts GitHub](https://github.com/vechain/smart-accounts) (official SimpleAccount + SimpleAccountFactory)
+- [Smart Accounts Documentation](https://docs.vechainkit.vechain.org/social-login/smart-accounts)
+- [DIY Social Login Tutorial (dapp-kit + Privy)](https://docs.vechain.org/developer-resources/example-dapps/pwa-with-privy-and-account-abstraction) (complex, VeChain Kit recommended instead)
+- [DIY Tutorial Example Repo](https://github.com/vechain-energy/docs-pwa-privy-account-abstraction-my-pwa-project)
+
 ## Scaffolding
 - [create-vechain-dapp](https://www.npmjs.com/package/create-vechain-dapp) (`npx create-vechain-dapp@latest`)
 - [create-vechain-dapp GitHub](https://github.com/vechain/create-vechain-dapp) (templates: X2Earn, Simple Dapp, Buy Me Coffee, Smart Contract)

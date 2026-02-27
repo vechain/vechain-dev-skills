@@ -10,7 +10,7 @@ Use when the user asks about: VeChain Kit, dapp-kit, wallet connection, social l
 |----------|-------------|----------|
 | **Best for** | Full-featured dApps | Lightweight wallet-only |
 | **Frameworks** | React, Next.js only | React, Next, Vue, Svelte, Angular |
-| **Social login** | Yes (Privy) | No |
+| **Social login** | Yes (Privy, built-in) | DIY only (complex, see below) |
 | **Pre-built UI** | WalletButton, modals, transaction UI | Minimal (WalletButton only) |
 | **Transaction hooks** | useSendTransaction, useTransferVET, useTransferERC20 | None (use SDK directly) |
 | **Contract read hooks** | useCallClause (React Query-based) | None |
@@ -435,6 +435,23 @@ openProfile({ isolatedView: true }); // Prevent navigation to other kit sections
 - Deterministic address (can receive tokens before deployment)
 - V3 required for multi-clause and replay protection
 - Check: `useUpgradeRequiredForAccount`
+- **Factory addresses** (must use the [official factory](https://github.com/vechain/smart-accounts) for ecosystem compatibility):
+  - Mainnet: `0xC06Ad8573022e2BE416CA89DA47E8c592971679A`
+  - Testnet: `0x713b908Bcf77f3E00EFEf328E50b657a1A23AeaF`
+
+### Privy Setup (Required for Social Login)
+
+Both VeChain Kit and DIY approaches require a [Privy](https://privy.io) account. Create an app at privy.io, then:
+- Retrieve your **App ID** and **Client ID** from the App Settings tab
+- For VeChain Kit: pass them as props to `VeChainKitProvider` (see [setup guide](https://docs.vechainkit.vechain.org/quickstart/setup-privy-optional)):
+```tsx
+<VeChainKitProvider
+  privy={{
+    appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+    clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
+  }}
+>
+```
 
 ### Fee Delegation is Mandatory for Social Login
 Social login users cannot hold VTHO. Configure a delegation service:
@@ -455,6 +472,52 @@ const handleSend = async () => {
   sendTransaction(clauses);
 };
 ```
+
+---
+
+## DIY Social Login with dapp-kit + Privy (Not Recommended)
+
+An alternative to VeChain Kit's built-in social login is using dapp-kit while handling Privy integration, smart account management, and EIP-712 signing yourself. **This adds significant complexity and is not recommended unless you have a specific reason VeChain Kit cannot work for your use case.**
+
+- [Tutorial](https://docs.vechain.org/developer-resources/example-dapps/pwa-with-privy-and-account-abstraction)
+- [Example repo](https://github.com/vechain-energy/docs-pwa-privy-account-abstraction-my-pwa-project)
+- [Smart accounts factory](https://github.com/vechain/smart-accounts)
+
+### VeChain Kit vs DIY Comparison
+
+| Concern | VeChain Kit (recommended) | DIY with dapp-kit |
+|---------|--------------------------|-------------------|
+| Smart account contracts | Uses official pre-deployed factory | Must deploy your own OR integrate official factory |
+| EIP-712 signing | Automated in `useSendTransaction` | Manual typed data construction |
+| Account deployment detection | Built-in (lazy deploy on first tx) | Custom logic required |
+| Replay protection | Built-in nonce handling (V3) | Manual nonce management |
+| Version upgrades (V1→V3) | `useUpgradeRequiredForAccount` + modal | Must track yourself |
+| Batch/multi-clause | Automated via `executeBatchWithAuthorization` | Must build manually |
+| iOS/Android signing | Handled (custom domain separator) | Not addressed in tutorial |
+| Cross-app compatibility | Supported via `@privy-io/cross-app-connect` | Not supported |
+| Provider setup | Single `<VeChainKitProvider>` | Nested `<PrivyProvider>` + custom `<VeChainAccountProvider>` |
+
+### Critical: Use the Official Smart Accounts Factory
+
+If you take the DIY path, you **must** use the [official vechain/smart-accounts factory](https://github.com/vechain/smart-accounts) (`0xC06Ad...` mainnet / `0x713b9...` testnet). Deploying your own factory (as the tutorial does) creates smart accounts that are **not compatible** with VeChain Kit, VeWorld, or other VeChain ecosystem apps. Users would have different addresses across apps.
+
+See [Smart Accounts documentation](https://docs.vechainkit.vechain.org/social-login/smart-accounts) for factory details.
+
+### What You Must Implement Yourself
+
+1. **EIP-712 typed data construction** -- build and sign authorization payloads for `executeWithAuthorization`
+2. **Lazy account deployment** -- detect undeployed accounts and inject factory creation clauses on first transaction
+3. **Fee delegation integration** -- separate sponsor signature flow
+4. **Nonce management** -- for `executeBatchWithAuthorization` replay protection
+5. **Version migration** -- the factory has evolved V1→V3 (V2 was skipped); handle upgrades
+6. **HTTPS requirement** -- Privy uses `crypto.subtle`, requiring HTTPS even in development (e.g., ngrok)
+7. **Ephemeral wallet for submission** -- generate a random wallet as the transaction entry point; actual auth comes from the Privy-signed EIP-712 message
+
+### When DIY Might Be Justified
+
+- You need custom smart account logic beyond what SimpleAccount V3 provides
+- You need full control over the signing/submission pipeline
+- You are building for a non-React framework where VeChain Kit cannot run
 
 ---
 
