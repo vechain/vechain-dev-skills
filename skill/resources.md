@@ -22,12 +22,15 @@
 
 ## Scaffolding
 - [create-vechain-dapp](https://www.npmjs.com/package/create-vechain-dapp) (`npx create-vechain-dapp@latest`)
+- [create-vechain-dapp GitHub](https://github.com/vechain/create-vechain-dapp) (templates: X2Earn, Simple Dapp, Buy Me Coffee, Smart Contract)
 
 ## VeChain SDK
 - [VeChain SDK GitHub](https://github.com/vechain/vechain-sdk-js)
 - [@vechain/sdk-core npm](https://www.npmjs.com/package/@vechain/sdk-core) (offline: transactions, signing, encoding)
 - [@vechain/sdk-network npm](https://www.npmjs.com/package/@vechain/sdk-network) (network: ThorClient, providers, contracts)
 - [@vechain/sdk-errors npm](https://www.npmjs.com/package/@vechain/sdk-errors)
+- [@vechain/vechain-contract-types npm](https://www.npmjs.com/package/@vechain/vechain-contract-types) (pre-built TypeChain types for VeChain ecosystem contracts)
+- [@vechain/contract-getters npm](https://www.npmjs.com/package/@vechain/contract-getters) (framework-agnostic read-only getters: balances, VNS, avatars, smart accounts)
 - [SDK Accounts Guide](https://docs.vechain.org/developer-resources/sdks-and-providers/sdk/accounts)
 - [SDK Transactions Guide](https://docs.vechain.org/developer-resources/sdks-and-providers/sdk/transactions)
 - [SDK Contracts Guide](https://docs.vechain.org/developer-resources/sdks-and-providers/sdk/contracts)

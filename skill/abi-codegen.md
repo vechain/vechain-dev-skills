@@ -113,6 +113,34 @@ const results = await thorClient.contracts.executeMultipleClausesCall([
 - If consumers need pre-built types, publish the package or check in the generated files.
 - Always regenerate after contract changes (`npx hardhat compile`).
 
+## Pre-built Types: @vechain/vechain-contract-types
+
+For VeChain ecosystem contracts (smart accounts, built-in contracts, etc.), use the pre-built TypeChain types instead of generating your own:
+
+```bash
+npm install @vechain/vechain-contract-types
+```
+
+```typescript
+import { SimpleAccount__factory } from '@vechain/vechain-contract-types';
+
+// Use with useCallClause in VeChain Kit
+const { data } = useCallClause({
+  abi: SimpleAccount__factory.abi,
+  address: contractAddress,
+  method: 'getOwner',
+  args: [],
+});
+
+// Use with ThorClient
+const contract = thorClient.contracts.load(
+  contractAddress,
+  SimpleAccount__factory.abi
+);
+```
+
+**Note**: Do not modify the auto-generated files in this package. For your own contracts, generate types with TypeChain as described above.
+
 ## "Do not do this"
 - Do not copy-paste ABI arrays into application code manually.
 - Do not write manual TypeScript interfaces for contract methods.

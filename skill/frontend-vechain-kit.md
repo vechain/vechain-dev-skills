@@ -28,6 +28,14 @@ See [Should I Use It?](https://docs.vechainkit.vechain.org/discover-vechain-kit/
 npx create-vechain-dapp@latest
 ```
 
+Available templates:
+| Template | Description |
+|----------|-------------|
+| **X2Earn** | Monorepo (Turbo) with React frontend, Express.js backend, Hardhat contracts, ChatGPT image recognition, VeBetterDAO integrations |
+| **Simple Dapp** | Monorepo (Turbo) with React + Hardhat. Available in VeChain Kit or DAppKit variants |
+| **Buy Me Coffee** | Guided tutorial: build a complete dApp with smart contract integration |
+| **Smart Contract** | Hardhat-only template for contract development without frontend |
+
 ### Manual Installation
 ```bash
 yarn add @vechain/vechain-kit
@@ -350,6 +358,21 @@ const typedSig = await signTypedData({
   primaryType: 'Message',
 });
 ```
+
+### @vechain/contract-getters (Framework-Agnostic Reads)
+
+For read-only blockchain queries outside of React components, use `@vechain/contract-getters`. It provides typed getters for common data (balances, VNS domains, avatars, smart accounts) and works in both Node.js and browser environments.
+
+```bash
+npm install @vechain/contract-getters
+```
+
+Use this package when you need blockchain reads in:
+- Backend scripts or API routes
+- Non-React frontend frameworks
+- Utility functions outside of component lifecycle
+
+For React components, prefer the VeChain Kit hooks (`useCallClause`, `useVechainDomain`, etc.) instead, as they integrate with React Query for caching and reactivity.
 
 ---
 
