@@ -11,7 +11,7 @@ Use this Skill for any VeChain development task:
 - Frontend dApps (React/Next.js), wallet connection, social login
 - Transaction building, sending, confirmation UX
 - Solidity smart contracts on VeChainThor
-- Multi-clause transactions, fee delegation (VIP-191/MPP)
+- Multi-clause transactions, fee delegation (VIP-191)
 - Testing with Hardhat + Thor Solo
 - Security reviews
 - VeBetterDAO / X2Earn apps, StarGate staking, governance
@@ -70,7 +70,7 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 | Gas optimization | [smart-contracts-optimization.md](smart-contracts-optimization.md) | gas, optimize, storage packing, assembly, unchecked |
 | Testing | [testing.md](testing.md) | test, Thor Solo, Docker, CI, fixtures |
 | ABI / codegen | [abi-codegen.md](abi-codegen.md) | TypeChain, ABI, typechain-types, code generation |
-| Fee delegation | [fee-delegation.md](fee-delegation.md) | gasless, sponsored, VIP-191, MPP, delegator, vechain.energy |
+| Fee delegation | [fee-delegation.md](fee-delegation.md) | gasless, sponsored, VIP-191, delegator, vechain.energy |
 | Multi-clause | [multi-clause-transactions.md](multi-clause-transactions.md) | batch, multi-clause, atomic, multiple operations |
 | Security | [security.md](security.md) | security, audit, vulnerability, reentrancy, access control |
 | VeBetterDAO | [vebetterdao.md](vebetterdao.md) | X2Earn, B3TR, sustainability, rewards, VeBetterDAO |

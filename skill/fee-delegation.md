@@ -1,4 +1,4 @@
-# Fee Delegation (VIP-191 / MPP)
+# Fee Delegation (VIP-191)
 
 ## When to use
 
@@ -8,25 +8,15 @@ Use when the user asks about:
 - Fee abstraction for onboarding
 - Meta-transactions on VeChain
 - VIP-191 designated gas payer
-- Multi-Party Payment (MPP) protocol
 - Social login fee sponsorship (mandatory for social login users)
 
-## Two Fee Delegation Protocols
+## VIP-191: Designated Gas Payer
 
-VeChain offers two complementary fee delegation mechanisms:
-
-### VIP-191: Designated Gas Payer (preferred)
 - Operates at the **transaction level**
 - Flexible: per-transaction sponsorship decisions
 - Both sender and sponsor must be online
 - Requires `reserved.features = 1` in the transaction body
 - Best for: selective sponsorship, promotional campaigns, onboarding flows
-
-### MPP: Multi-Party Payment
-- Operates at the **smart contract level**
-- Data is written on-chain (costs gas to set up)
-- Both parties do NOT need to be online simultaneously
-- Best for: dApps that sponsor ALL user transactions for specific contracts
 
 ## VIP-191 Implementation
 
@@ -179,66 +169,6 @@ vechain_testnet_delegated: {
   gasPrice: 'auto'
 }
 ```
-
-## MPP Implementation
-
-### Setting Up MPP (Contract Owner)
-
-MPP is configured through the built-in `Prototype` contract on VeChainThor:
-
-```solidity
-// The Prototype built-in contract at:
-// 0x000000000000000000000050726f746f74797065
-
-interface IPrototype {
-    // Set the credit plan for a contract
-    function creditPlan(uint256 credit, uint256 recoveryRate) external;
-
-    // Add a user to the MPP user list
-    function addUser(address user) external;
-
-    // Remove a user from the MPP user list
-    function removeUser(address user) external;
-
-    // Check if a user is in the MPP user list
-    function isUser(address user) external view returns (bool);
-
-    // Set the contract's master (who pays)
-    function master(address newMaster) external;
-}
-```
-
-### MPP via SDK
-
-```typescript
-import { ThorClient } from '@vechain/sdk-network';
-
-const thorClient = ThorClient.at('https://testnet.vechain.org');
-
-// The contract owner sets up MPP for their contract
-// This means the contract's master account pays gas for users
-const prototypeContract = thorClient.contracts.load(
-    '0x000000000000000000000050726f746f74797065',
-    prototypeABI
-);
-
-// Set credit plan: each user gets 1M gas credit, recovers at 1000 gas/sec
-await prototypeContract.transact.creditPlan(1_000_000, 1000);
-
-// Add specific users to the sponsored list
-await prototypeContract.transact.addUser(userAddress);
-```
-
-## Choosing Between VIP-191 and MPP
-
-| Criteria | VIP-191 | MPP |
-|----------|---------|-----|
-| Granularity | Per-transaction | Per-contract |
-| Setup cost | None (off-chain) | On-chain transactions |
-| Flexibility | High (custom logic) | Fixed (credit plan) |
-| Online requirement | Both parties | Neither (on-chain rules) |
-| Best for | Selective sponsorship | Blanket sponsorship |
-| User experience | Seamless (delegate URL) | Automatic (no user action) |
 
 ## Building a Gas Payer Service
 
