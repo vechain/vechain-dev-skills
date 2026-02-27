@@ -51,21 +51,27 @@ Use this Skill when the user asks for:
 ## Operating procedure (how to execute tasks)
 When solving a VeChain task:
 
-### 1. Classify the task layer
+### 1. Detect project structure
+- Check for `turbo.json` -- if present, follow the Turborepo monorepo conventions (`apps/frontend`, `packages/contracts`, `packages/*`).
+- Check which VeChain frontend package is used: VeChain Kit (`@vechain/vechain-kit`) or dapp-kit (`@vechain/dapp-kit-react`).
+- For VeChain Kit projects, use `useThor` (not deprecated `useConnex`).
+- Apply conditional patterns (Chakra UI, i18n, Zustand) only when the project actually uses them.
+
+### 2. Classify the task layer
 - UI/wallet/hook layer
 - Client SDK/scripts layer
 - Smart contract layer (+ ABI)
 - Testing/CI layer
 - Infra (node/indexing/monitoring)
 
-### 2. Pick the right building blocks
+### 3. Pick the right building blocks
 - UI (full-featured): VeChain Kit patterns.
 - UI (lightweight/non-React): dapp-kit patterns.
 - Scripts/backends: @vechain/sdk-core + sdk-network directly.
 - Legacy library present: migrate to unified SDK or introduce adapter boundary.
 - Gas optimization: Solidity optimization patterns (storage packing, assembly).
 
-### 3. Implement with VeChain-specific correctness
+### 4. Implement with VeChain-specific correctness
 Always be explicit about:
 - network + node URL (mainnet/testnet/solo)
 - fee payer + gas estimation + fee delegation setup
@@ -74,12 +80,12 @@ Always be explicit about:
 - social login considerations (smart accounts, mandatory fee delegation)
 - EVM version compatibility (paris)
 
-### 4. Add tests
+### 5. Add tests
 - Unit test: Hardhat with Thor Solo.
 - Integration test: Thor Solo with realistic state.
 - For "wallet UX", add mocked hook/provider tests where appropriate.
 
-### 5. Deliverables expectations
+### 6. Deliverables expectations
 When you implement changes, provide:
 - exact files changed + diffs (or patch-style output)
 - commands to install/build/test

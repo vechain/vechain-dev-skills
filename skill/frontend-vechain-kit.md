@@ -454,6 +454,49 @@ const handleSend = async () => {
 
 ---
 
+## Common Project Architecture (Turborepo)
+
+Many VeChain dApps use a Turborepo monorepo. When the project follows this structure, respect these conventions:
+
+```
+root/
+├── apps/
+│   └── frontend/          # Next.js App Router
+│       └── src/
+│           ├── api/
+│           │   ├── contracts/  # Contract read hooks (useCallClause wrappers)
+│           │   └── indexer/    # Indexer/API query hooks
+│           ├── app/            # Next.js App Router pages
+│           └── components/
+├── packages/
+│   ├── contracts/          # Hardhat smart contracts
+│   ├── config/             # Shared config (ESLint, TS, etc.)
+│   ├── utils/              # Shared utilities
+│   └── constants/          # Shared constants, addresses, ABIs
+├── turbo.json
+└── package.json
+```
+
+**Apply these conventions only when the project actually uses this structure.** Check for `turbo.json` or `"turbo"` in the root `package.json` to confirm.
+
+### API Layer Convention
+When the project has `src/api/contracts/`:
+- Place each contract read hook in its own file (e.g., `useTokenBalance.ts`)
+- Export all hooks from `src/api/contracts/index.ts`
+- Indexer queries go in `src/api/indexer/`
+
+### useThor (not useConnex)
+When the project uses VeChain Kit, use `useThor` for direct Thor client access. `useConnex` is deprecated in VeChain Kit projects:
+
+```tsx
+import { useThor } from '@vechain/vechain-kit';
+const thor = useThor();
+```
+
+**Note**: `useConnex` is still valid in dapp-kit projects (`@vechain/dapp-kit-react`).
+
+---
+
 ## State Management Pattern
 
 When the project uses React Query + Zustand:
