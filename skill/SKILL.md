@@ -16,6 +16,9 @@ Use this Skill when the user asks for:
 - Fee delegation (VIP-191 / MPP)
 - Local testing with Thor Solo
 - Security hardening and audit-style reviews
+- VeBetterDAO / X2Earn sustainability apps / B3TR rewards
+- StarGate NFT staking / validator delegation / VTHO rewards
+- VeChain governance (VeVote, VeBetterDAO Governor)
 
 ## Default stack decisions (opinionated)
 1) **UI: VeChain Kit first**
@@ -92,4 +95,7 @@ When you implement changes, provide:
 - Fee delegation: [fee-delegation.md](fee-delegation.md)
 - Multi-clause transactions: [multi-clause-transactions.md](multi-clause-transactions.md)
 - Security checklist: [security.md](security.md)
+- VeBetterDAO / X2Earn apps: [vebetterdao.md](vebetterdao.md)
+- StarGate staking / delegation: [stargate-staking.md](stargate-staking.md)
+- Governance (VeVote + VeBetterDAO): [governance.md](governance.md)
 - Reference links: [resources.md](resources.md)

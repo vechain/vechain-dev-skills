@@ -46,6 +46,9 @@ skill/
 ├── fee-delegation.md                 # Fee delegation (VIP-191 / MPP)
 ├── multi-clause-transactions.md      # Multi-clause transaction patterns
 ├── security.md                       # Security vulnerabilities & prevention
+├── vebetterdao.md                    # VeBetterDAO / X2Earn sustainability apps
+├── stargate-staking.md               # StarGate NFT staking & delegation
+├── governance.md                     # Governance (VeVote + VeBetterDAO)
 └── resources.md                      # Curated reference links
 ```
 
@@ -60,6 +63,9 @@ Once installed, Claude Code will automatically use this skill when you ask about
 - Multi-clause transactions and fee delegation
 - Local testing with Thor Solo
 - Security hardening and audit-style reviews
+- VeBetterDAO / X2Earn app development and B3TR rewards
+- StarGate NFT staking, validator delegation, and VTHO rewards
+- VeChain governance (VeVote and VeBetterDAO Governor)
 
 ### Example Prompts
 
@@ -71,6 +77,10 @@ Once installed, Claude Code will automatically use this skill when you ask about
 "Write Hardhat tests for my token transfer contract"
 "Should I use VeChain Kit or dapp-kit for my project?"
 "Review this contract for security issues"
+"Build an X2Earn app that rewards users with B3TR for recycling"
+"How do I distribute VeBetterDAO rewards from a backend?"
+"How does StarGate staking work and how do I delegate to a validator?"
+"Create a governance proposal on VeBetterDAO"
 ```
 
 ## Stack Decisions
