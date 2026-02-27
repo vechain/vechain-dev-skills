@@ -1,5 +1,51 @@
 # Curated Resources (Source-of-Truth First)
 
+## MCP Server (Live AI-Powered Docs + Blockchain Data)
+
+The VeChain MCP server gives Claude Code direct access to VeChain documentation search, blockchain queries, token data, VeBetterDAO stats, and StarGate staking info -- all without leaving the editor.
+
+### Setup (Claude Code)
+
+Add to `~/.claude/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "vechain": {
+      "command": "npx",
+      "args": ["-y", "@vechain/mcp-server@latest"],
+      "env": {
+        "VECHAIN_NETWORK": "mainnet"
+      }
+    }
+  }
+}
+```
+
+Set `VECHAIN_NETWORK` to `mainnet`, `testnet`, or `solo`. Restart Claude Code after adding.
+
+### Available Tools (26)
+
+| Category | Tools |
+|----------|-------|
+| **Docs search** | `searchDocsVechain`, `searchDocsVechainKit`, `searchDocsVebetterDao`, `searchDocsVevote`, `searchDocsStargate` |
+| **Blockchain** | `thorGetBlock`, `thorGetTransaction`, `thorGetAccount`, `thorDecodeEvent` |
+| **Tokens/NFTs** | `getTokenBalances`, `getTokenFiatPrice`, `getTokenRegistry`, `getNFTs`, `getNFTContracts` |
+| **VeBetterDAO** | `getB3TRGlobalOverview`, `getB3TRAppsLeaderboard`, `getB3TRProposalsResults`, `getB3TRProposalComments`, `getCurrentRound`, `getGMNFTStatus` |
+| **Staking** | `getStargateTotalVetStaked`, `getStargateTokenRewards`, `getValidators` |
+| **History** | `getTransactions`, `getTransfersOfAccount`, `getHistoryOfAccount` |
+
+- [@vechain/mcp-server npm](https://www.npmjs.com/package/@vechain/mcp-server)
+- [VeChain MCP Server GitHub](https://github.com/vechain/vechain-mcp-server)
+
+### Kapa.ai Docs MCP (alternative, docs-only)
+
+For docs-only queries via Kapa.ai's hosted infrastructure:
+```bash
+claude mcp add --transport http vechain-docs https://vechain.mcp.kapa.ai
+```
+
+---
+
 ## Core VeChain Documentation
 - [VeChain Documentation](https://docs.vechain.org/) (Core concepts, SDKs, tutorials)
 - [VeChain Whitepaper](https://www.vechain.org/whitepaper/)
