@@ -1,19 +1,4 @@
----
-name: testing
-description: Testing strategy for VeChain smart contracts using Hardhat and Thor Solo local node. Covers unit tests, integration tests, Docker setup, CI configuration, and test patterns.
-allowed-tools: []
-model: sonnet
-license: MIT
-metadata:
-  author: VeChain
-  version: "0.1.0"
----
-
 # Testing Strategy (Hardhat / Thor Solo)
-
-## When to use
-
-Use when the user asks about: testing, Thor Solo, Docker, CI/CD, test fixtures, test patterns.
 
 ## Testing Pyramid
 

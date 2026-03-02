@@ -7,9 +7,8 @@ This plugin contains skills for AI-assisted VeChain development.
 | Skill | Description |
 |-------|-------------|
 | `dapp-development` | Frontend dApps, wallet connection, VeChain Kit, dapp-kit, React Query patterns |
-| `smart-contracts` | Solidity + Hardhat on VeChainThor, gas optimization, ABI/TypeChain |
+| `smart-contracts` | Solidity + Hardhat on VeChainThor, gas optimization, ABI/TypeChain, testing with Thor Solo |
 | `transaction-patterns` | Fee delegation (VIP-191), multi-clause transactions |
-| `testing` | Hardhat testing with Thor Solo local node |
 | `security` | Smart contract vulnerability patterns and prevention |
 | `defi-ecosystem` | VeBetterDAO, StarGate staking, governance |
 

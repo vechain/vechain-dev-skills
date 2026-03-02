@@ -29,13 +29,12 @@ npx nx run vechain-dev:validate
 
 ## Skills
 
-The `vechain-dev` plugin provides 6 skills:
+The `vechain-dev` plugin provides 5 skills:
 
 | Skill | Description |
 |-------|-------------|
 | `dapp-development` | Frontend dApps, VeChain Kit, dapp-kit, React Query |
-| `smart-contracts` | Solidity + Hardhat, gas optimization, ABI codegen |
+| `smart-contracts` | Solidity + Hardhat, gas optimization, ABI codegen, testing with Thor Solo |
 | `transaction-patterns` | Fee delegation, multi-clause transactions |
-| `testing` | Hardhat testing with Thor Solo |
 | `security` | Smart contract vulnerability patterns |
 | `defi-ecosystem` | VeBetterDAO, StarGate, governance |
