@@ -1,3 +1,14 @@
+---
+name: security
+description: VeChain smart contract security checklist covering reentrancy, access control, integer overflow, front-running, proxy vulnerabilities, DoS, oracle manipulation, and more.
+allowed-tools: []
+model: sonnet
+license: MIT
+metadata:
+  author: VeChain
+  version: "0.1.0"
+---
+
 # VeChain Smart Contract Security Checklist
 
 ## When to use
@@ -7,6 +18,7 @@ Use when the user asks about: security, audit, vulnerability review, reentrancy,
 ## Core Principle
 
 Assume the attacker controls:
+
 - Every function argument
 - Transaction ordering (front-running, sandwich attacks)
 - External contract calls (reentrancy, composability exploits)
@@ -23,6 +35,7 @@ Assume the attacker controls:
 **Attack**: Attacker's `receive()` or `fallback()` function calls back into the vulnerable contract, draining funds.
 
 **Prevention**:
+
 ```solidity
 // Option 1: Use OpenZeppelin's ReentrancyGuard (recommended)
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -57,6 +70,7 @@ function withdraw(uint256 amount) external {
 **Attack**: Attacker calls admin functions (mint, pause, upgrade, withdraw) directly.
 
 **Prevention**:
+
 ```solidity
 // Use OpenZeppelin AccessControl or Ownable
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -82,6 +96,7 @@ contract RoleBased is AccessControl {
 ```
 
 **Critical**: Never use `tx.origin` for authorization:
+
 ```solidity
 // BAD: vulnerable to phishing via malicious contracts
 require(tx.origin == owner, "Not owner");
@@ -99,6 +114,7 @@ require(msg.sender == owner, "Not owner");
 **Note**: Solidity 0.8+ has built-in overflow checks. However, `unchecked` blocks bypass these.
 
 **Prevention**:
+
 ```solidity
 // Solidity 0.8+: safe by default
 uint256 result = a + b; // Reverts on overflow
@@ -128,6 +144,7 @@ uint8 safeValue = SafeCast.toUint8(bigValue); // Reverts if > 255
 **Attack**: Sandwich attacks on DEX trades, front-running NFT mints, oracle manipulation.
 
 **Prevention**:
+
 ```solidity
 // Use commit-reveal patterns for sensitive operations
 mapping(bytes32 => uint256) public commitments;
@@ -163,6 +180,7 @@ function swap(uint256 amountIn, uint256 minAmountOut) external {
 **Attack**: Attacker calls `initialize()` on an uninitialized proxy or exploits storage layout conflicts.
 
 **Prevention**:
+
 ```solidity
 // Always use initializers for upgradeable contracts
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -194,6 +212,7 @@ contract MyUpgradeable is Initializable {
 **Attack**: Gas griefing, unbounded loops, failed external calls blocking execution.
 
 **Prevention**:
+
 ```solidity
 // BAD: Unbounded loop over user-controlled array
 function distributeAll() external {
@@ -232,6 +251,7 @@ function distributeBatch(uint256 start, uint256 count) external {
 **Attack**: Flash loan attack manipulates spot price, attacker profits from mispriced assets.
 
 **Prevention**:
+
 ```solidity
 // Use time-weighted average prices (TWAP) instead of spot prices
 // Use multiple oracle sources
@@ -250,6 +270,7 @@ function getPrice() public view returns (uint256) {
 **Risk**: Low-level calls can fail silently or return unexpected data.
 
 **Prevention**:
+
 ```solidity
 // BAD: ignoring return value
 address(target).call{value: amount}("");
@@ -280,6 +301,7 @@ token.safeTransferFrom(sender, recipient, amount);
 **Risk**: Valid signatures can be reused across transactions, chains, or contexts.
 
 **Prevention**:
+
 ```solidity
 // Include nonce, chain ID, and contract address in signed data
 mapping(address => uint256) public nonces;
@@ -310,35 +332,41 @@ function executeWithSignature(
 ## Smart Contract Checklist
 
 ### Input Validation
+
 - [ ] Validate all function parameters (non-zero addresses, valid ranges)
 - [ ] Use `require` or custom errors for all preconditions
 - [ ] Validate array lengths match when processing parallel arrays
 - [ ] Check for zero amounts in transfer/approval functions
 
 ### Access Control
+
 - [ ] Every privileged function has appropriate access control
 - [ ] Use `Ownable2Step` for ownership transfers
 - [ ] Never use `tx.origin` for authorization
 - [ ] Admin functions are clearly identified and tested
 
 ### Reentrancy
+
 - [ ] Use `ReentrancyGuard` on all functions that make external calls
 - [ ] Follow Checks-Effects-Interactions pattern
 - [ ] State updates happen before external calls
 
 ### Arithmetic
+
 - [ ] Solidity 0.8+ is used (built-in overflow protection)
 - [ ] `unchecked` blocks are only used where overflow is provably impossible
 - [ ] Safe downcasting with `SafeCast` when needed
 - [ ] Division by zero is prevented
 
 ### External Interactions
+
 - [ ] Return values of external calls are checked
 - [ ] `SafeERC20` is used for token transfers
 - [ ] No reliance on `transfer()` or `send()` (use `call` instead)
 - [ ] Contract handles the case where external call reverts
 
 ### Upgradeable Contracts
+
 - [ ] `_disableInitializers()` in constructor
 - [ ] Storage layout preserved across upgrades
 - [ ] `initializer` modifier on initialization functions

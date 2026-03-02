@@ -1,3 +1,14 @@
+---
+name: testing
+description: Testing strategy for VeChain smart contracts using Hardhat and Thor Solo local node. Covers unit tests, integration tests, Docker setup, CI configuration, and test patterns.
+allowed-tools: []
+model: sonnet
+license: MIT
+metadata:
+  author: VeChain
+  version: "0.1.0"
+---
+
 # Testing Strategy (Hardhat / Thor Solo)
 
 ## When to use
@@ -121,7 +132,8 @@ docker run -d \
 ### Pre-Funded Accounts
 
 Thor Solo generates 10 pre-funded accounts from a built-in mnemonic:
-```
+
+```text
 denial kitchen pet squirrel other broom bar gas better priority spoil cross
 ```
 
@@ -130,6 +142,7 @@ Each account has ample VET and VTHO for development. **Never use this mnemonic f
 ### API Documentation
 
 Once running, access interactive docs at:
+
 - `http://127.0.0.1:8669/doc/stoplight-ui/`
 - `http://127.0.0.1:8669/doc/swagger-ui/`
 
@@ -273,7 +286,7 @@ describe('SDK Direct Tests', () => {
 
 ## Test Layout Recommendation
 
-```
+```text
 test/
 ├── unit/
 │   ├── Token.test.ts          # Unit tests

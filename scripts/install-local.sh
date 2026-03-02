@@ -1,22 +1,25 @@
 #!/bin/bash
 
-# VeChain Dev Skill Installer for Claude Code
-# Usage: ./install.sh [--project | --path <path>]
+# VeChain Dev Plugin Installer for Claude Code
+# Copies skills from packages/plugins/vechain-dev/skills/ to the target location.
+#
+# Usage: ./scripts/install-local.sh [--project | --path <path>]
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_NAME="vechain-dev"
-SOURCE_DIR="$SCRIPT_DIR/skill"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PLUGIN_NAME="vechain-dev"
+SOURCE_DIR="$REPO_ROOT/packages/plugins/$PLUGIN_NAME/skills"
 
 # Default to personal installation
-INSTALL_PATH="$HOME/.claude/skills/$SKILL_NAME"
+INSTALL_PATH="$HOME/.claude/skills/$PLUGIN_NAME"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --project)
-            INSTALL_PATH=".claude/skills/$SKILL_NAME"
+            INSTALL_PATH=".claude/skills/$PLUGIN_NAME"
             shift
             ;;
         --path)
@@ -24,16 +27,16 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            echo "VeChain Dev Skill Installer"
+            echo "VeChain Dev Plugin Installer"
             echo ""
-            echo "Usage: ./install.sh [OPTIONS]"
+            echo "Usage: ./scripts/install-local.sh [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --project     Install to current project (.claude/skills/$SKILL_NAME)"
+            echo "  --project     Install to current project (.claude/skills/$PLUGIN_NAME)"
             echo "  --path PATH   Install to custom path"
             echo "  -h, --help    Show this help message"
             echo ""
-            echo "Default: Install to ~/.claude/skills/$SKILL_NAME"
+            echo "Default: Install to ~/.claude/skills/$PLUGIN_NAME"
             exit 0
             ;;
         *)
@@ -50,11 +53,10 @@ if [ ! -d "$SOURCE_DIR" ]; then
     exit 1
 fi
 
-# Check if SKILL.md exists
-if [ ! -f "$SOURCE_DIR/SKILL.md" ]; then
-    echo "Error: SKILL.md not found in '$SOURCE_DIR'"
-    exit 1
-fi
+# Validate plugin before installing
+echo "Validating plugin..."
+node "$REPO_ROOT/scripts/validate-plugin.cjs" "$REPO_ROOT/packages/plugins/$PLUGIN_NAME"
+echo ""
 
 # Create parent directory if needed
 mkdir -p "$(dirname "$INSTALL_PATH")"
@@ -72,16 +74,23 @@ if [ -d "$INSTALL_PATH" ]; then
 fi
 
 # Copy skill files
-echo "Installing VeChain Dev Skill..."
+echo "Installing VeChain Dev Plugin..."
 cp -r "$SOURCE_DIR" "$INSTALL_PATH"
 
 echo ""
 echo "Successfully installed to: $INSTALL_PATH"
 echo ""
-echo "Installed files:"
-find "$INSTALL_PATH" -type f -name "*.md" | while read -r file; do
-    echo "  - $(basename "$file")"
+echo "Installed skills:"
+for skill_dir in "$INSTALL_PATH"/*/; do
+    if [ -f "$skill_dir/SKILL.md" ]; then
+        skill_name=$(basename "$skill_dir")
+        ref_count=0
+        if [ -d "$skill_dir/references" ]; then
+            ref_count=$(find "$skill_dir/references" -name "*.md" | wc -l | tr -d ' ')
+        fi
+        echo "  - $skill_name (SKILL.md + $ref_count reference files)"
+    fi
 done
 echo ""
-echo "The skill is now available in Claude Code."
+echo "The plugin is now available in Claude Code."
 echo "Try asking about VeChain development to activate it!"

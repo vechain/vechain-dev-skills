@@ -480,7 +480,7 @@ To improve UX, you can optionally sponsor transactions so users pay nothing:
 <VeChainKitProvider feeDelegation={{ delegatorUrl: 'https://your-delegator.com/delegate' }}>
 ```
 
-See [fee-delegation.md](fee-delegation.md) for Generic Delegator gas estimation, per-transaction sponsorship, and vechain.energy setup.
+See [fee-delegation.md](../../transaction-patterns/references/fee-delegation.md) for Generic Delegator gas estimation, per-transaction sponsorship, and vechain.energy setup.
 
 ### Pre-fetch Data Before Transactions
 Fetching during `sendTransaction` blocks popups for social login:

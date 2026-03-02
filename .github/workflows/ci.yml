@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint markdown
+        run: npx markdownlint-cli2 '**/*.md' '#node_modules' '#.git'
+
+      - name: Validate plugin structure
+        run: node scripts/validate-plugin.cjs packages/plugins/vechain-dev
+
+      - name: Typecheck
+        run: npx tsc --noEmit

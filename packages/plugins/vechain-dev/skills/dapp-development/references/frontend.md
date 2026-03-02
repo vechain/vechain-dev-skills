@@ -292,14 +292,14 @@ const { language, setLanguage } = useCurrentLanguage();
 
 ## Transaction UX Checklist
 
-* Disable inputs while a transaction is pending
-* Show transaction status via `TransactionModal` or `TransactionToast`
-* Provide a transaction ID immediately after signing
-* Track confirmation via `useTxReceipt`
-* Invalidate affected React Query caches on transaction success
-* Show actionable errors:
-  * user rejected signing (`UserRejectedError`)
-  * transaction reverted (`RevertReasonError` with reason)
-  * insufficient VET for transfer
-  * insufficient balance for gas fees (VET/VTHO/B3TR)
-* Handle fee delegation failures gracefully (fallback or clear error)
+- Disable inputs while a transaction is pending
+- Show transaction status via `TransactionModal` or `TransactionToast`
+- Provide a transaction ID immediately after signing
+- Track confirmation via `useTxReceipt`
+- Invalidate affected React Query caches on transaction success
+- Show actionable errors:
+  - user rejected signing (`UserRejectedError`)
+  - transaction reverted (`RevertReasonError` with reason)
+  - insufficient VET for transfer
+  - insufficient balance for gas fees (VET/VTHO/B3TR)
+- Handle fee delegation failures gracefully (fallback or clear error)

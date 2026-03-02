@@ -13,5 +13,17 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Installed skills (created by ./install.sh --project)
+# Node / npm
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+
+# Nx
+.nx/
+.cache/
+
+# Installed skills (created by scripts/install-local.sh --project)
 .claude/
+!.claude/settings.local.json

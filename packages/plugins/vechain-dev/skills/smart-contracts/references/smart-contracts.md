@@ -204,7 +204,7 @@ contract MyUpgradeable is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
 ### Two Kinds of Libraries
 
-**A) Storage-types library (not deployed)**
+#### A) Storage-types library (not deployed)
 
 Holds storage structs and `internal` getters that return `storage` via a fixed slot (ERC-7201). No `external` functions -- compiled into the contract, not deployed separately.
 
@@ -227,7 +227,7 @@ library MyModuleStorageTypes {
 }
 ```
 
-**B) Utils libraries (deployed and linked)**
+#### B) Utils libraries (deployed and linked)
 
 Contain `external` functions with real logic. Read/write the same storage as the main contract via the storage-types library. Deployed separately; main contract calls them as `LibraryName.functionName(...)`.
 
@@ -375,7 +375,7 @@ npx hardhat run scripts/deploy.ts --network vechain_mainnet
 
 ### Deploy with Fee Delegation
 
-Add a `delegate` config to the network. See [fee-delegation.md](fee-delegation.md) for full setup.
+Add a `delegate` config to the network. See [fee-delegation.md](../../transaction-patterns/references/fee-delegation.md) for full setup.
 
 ## Contract Interaction with SDK
 
