@@ -1,0 +1,31 @@
+{
+  "name": "vechain-dev",
+  "version": "0.1.0",
+  "description": "Full-stack VeChain development — dApps (VeChain Kit, dapp-kit), smart contracts (Solidity + Hardhat), fee delegation, multi-clause transactions, testing, security, and DeFi ecosystem (VeBetterDAO, StarGate, governance)",
+  "author": {
+    "name": "VeChain",
+    "email": "developers@vechain.org"
+  },
+  "homepage": "https://github.com/vechain/vechain-dev-skill",
+  "keywords": [
+    "vechain",
+    "blockchain",
+    "dapp",
+    "solidity",
+    "hardhat",
+    "vechain-kit",
+    "fee-delegation",
+    "vebetterdao",
+    "stargate",
+    "smart-contracts"
+  ],
+  "license": "MIT",
+  "skills": [
+    "./skills/dapp-development",
+    "./skills/smart-contracts",
+    "./skills/transaction-patterns",
+    "./skills/testing",
+    "./skills/security",
+    "./skills/defi-ecosystem"
+  ]
+}

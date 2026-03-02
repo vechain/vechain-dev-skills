@@ -1,0 +1,19 @@
+{
+  "name": "vechain-ai",
+  "version": "1.0.0",
+  "owner": {
+    "name": "VeChain",
+    "email": "developers@vechain.org"
+  },
+  "metadata": {
+    "description": "VeChain-specific AI tools (skills, plugins, agents) for developers and AI agents building on the VeChainThor blockchain.",
+    "repository": "https://github.com/vechain/vechain-dev-skill"
+  },
+  "plugins": [
+    {
+      "name": "vechain-dev",
+      "source": "./packages/plugins/vechain-dev",
+      "description": "Full-stack VeChain development — dApps, smart contracts, fee delegation, testing, security, and DeFi ecosystem (VeBetterDAO, StarGate, governance)"
+    }
+  ]
+}

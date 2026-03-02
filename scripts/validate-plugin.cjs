@@ -96,6 +96,19 @@ function validatePlugin(pluginDir) {
     errors.push(`${pluginDir}: missing package.json`);
   }
 
+  // Check plugin has .claude-plugin/plugin.json
+  const pluginJsonPath = path.join(abs, '.claude-plugin', 'plugin.json');
+  if (!fs.existsSync(pluginJsonPath)) {
+    errors.push(`${pluginDir}: missing .claude-plugin/plugin.json`);
+  } else {
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf-8'));
+    if (!pluginJson.name) errors.push(`${pluginDir}: plugin.json missing "name"`);
+    if (!pluginJson.version) errors.push(`${pluginDir}: plugin.json missing "version"`);
+    if (!pluginJson.skills || !Array.isArray(pluginJson.skills) || pluginJson.skills.length === 0) {
+      errors.push(`${pluginDir}: plugin.json missing or empty "skills" array`);
+    }
+  }
+
   // Check skills/ directory exists
   const skillsDir = path.join(abs, 'skills');
   if (!fs.existsSync(skillsDir)) {
@@ -111,6 +124,8 @@ function validatePlugin(pluginDir) {
     return errors;
   }
 
+  const skillNames = [];
+
   for (const skill of skills) {
     const skillMd = path.join(skillsDir, skill.name, 'SKILL.md');
     if (!fs.existsSync(skillMd)) {
@@ -118,6 +133,7 @@ function validatePlugin(pluginDir) {
       continue;
     }
     validateSkillFile(skillMd, errors);
+    skillNames.push(skill.name);
 
     // If references/ exists, check it's not empty
     const refsDir = path.join(skillsDir, skill.name, 'references');
@@ -125,6 +141,25 @@ function validatePlugin(pluginDir) {
       const refs = fs.readdirSync(refsDir).filter((f) => f.endsWith('.md'));
       if (refs.length === 0) {
         errors.push(`${pluginDir}/skills/${skill.name}/references: directory exists but has no .md files`);
+      }
+    }
+  }
+
+  // Cross-check plugin.json skills against actual skill directories
+  if (fs.existsSync(pluginJsonPath)) {
+    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf-8'));
+    if (pluginJson.skills && Array.isArray(pluginJson.skills)) {
+      for (const skillRef of pluginJson.skills) {
+        const skillName = path.basename(skillRef);
+        if (!skillNames.includes(skillName)) {
+          errors.push(`${pluginDir}: plugin.json references skill "${skillName}" but no matching directory found`);
+        }
+      }
+      for (const name of skillNames) {
+        const listed = pluginJson.skills.some((s) => path.basename(s) === name);
+        if (!listed) {
+          errors.push(`${pluginDir}: skill "${name}" exists but is not listed in plugin.json`);
+        }
       }
     }
   }
