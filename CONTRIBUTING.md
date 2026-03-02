@@ -21,11 +21,7 @@ packages/plugins/vechain-dev/
   .claude-plugin/
     plugin.json                             # Plugin manifest (name, version, skills)
   skills/
-    dapp-development/                       # SKILL.md + references/
-    smart-contracts/                        # SKILL.md + references/
-    transaction-patterns/                   # SKILL.md + references/
-    security/                               # SKILL.md (single-file)
-    defi-ecosystem/                         # SKILL.md + references/
+    vechain-dev/                            # SKILL.md + references/ (15 files)
 scripts/                                    # Validation and install scripts
 evals/                                      # Promptfoo evaluation suites
 docs/                                       # Documentation
@@ -100,7 +96,7 @@ The **marketplace** path requires two metadata files:
 
     ```json
     "skills": [
-      "./skills/dapp-development",
+      "./skills/vechain-dev",
       "./skills/my-new-skill"
     ]
     ```
@@ -165,10 +161,9 @@ Plugins are independent packages under `packages/plugins/`. To add a new one:
 ## SKILL.md Conventions
 
 - **Frontmatter** must include: `name`, `description`, `license`
-- **`name`** must match the directory name (e.g., `name: security` in `skills/security/SKILL.md`)
-- **Single-file skills** (like `security`) inline all content in SKILL.md
-- **Multi-file skills** use `references/` for supplementary docs and a progressive disclosure table in SKILL.md
-- Cross-references between skills use relative paths (e.g., `../../transaction-patterns/references/fee-delegation.md`)
+- **`name`** must match the directory name (e.g., `name: vechain-dev` in `skills/vechain-dev/SKILL.md`)
+- Skills use `references/` for supplementary docs and a progressive disclosure table in SKILL.md
+- Cross-references between reference files use relative paths
 
 ## PR Checklist
 

@@ -19,15 +19,14 @@ npx skills add vechain/vechain-ai
 
 ### vechain-dev plugin
 
-Five skills covering the full VeChain development stack:
+A single comprehensive skill covering the full VeChain development stack:
 
-| Skill | Description |
-|-------|-------------|
-| **dapp-development** | Frontend dApps with VeChain Kit or dapp-kit, React Query patterns, Turborepo conventions, SDK migration |
-| **smart-contracts** | Solidity + Hardhat on VeChainThor, gas optimization, ABI codegen, testing with Thor Solo |
-| **transaction-patterns** | Fee delegation (VIP-191), multi-clause transactions, delegation services |
-| **security** | Smart contract vulnerability review, security checklists |
-| **defi-ecosystem** | VeBetterDAO (X2Earn / B3TR), StarGate staking, governance (VeVote / VOT3) |
+- Frontend dApps with VeChain Kit or dapp-kit, React Query patterns, SDK migration
+- Solidity + Hardhat on VeChainThor, gas optimization, ABI codegen
+- Fee delegation (VIP-191), multi-clause transactions
+- Testing with Hardhat + Thor Solo
+- Smart contract security review and checklists
+- VeBetterDAO (X2Earn / B3TR), StarGate staking, governance (VeVote / VOT3)
 
 ## Example Prompts
 

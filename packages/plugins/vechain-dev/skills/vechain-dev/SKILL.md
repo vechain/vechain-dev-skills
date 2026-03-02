@@ -1,6 +1,6 @@
 ---
-name: dapp-development
-description: Frontend dApp development on VeChain. VeChain Kit for React dApps, dapp-kit for lightweight integrations, React Query patterns, transaction UX, social login, wallet connection.
+name: vechain-dev
+description: VeChain development playbook. VeChain Kit for React dApps, SDK for backends, Solidity+Hardhat for contracts, Thor Solo for testing. Covers fee delegation, multi-clause, social login, VeBetterDAO, StarGate, governance.
 allowed-tools: []
 model: sonnet
 license: MIT
@@ -9,16 +9,19 @@ metadata:
   version: "0.1.0"
 ---
 
-# VeChain dApp Development
+# VeChain Development Skill
 
 ## Scope
 
-Use this Skill for any VeChain frontend or dApp development task:
+Use this Skill for any VeChain development task:
 
 - Frontend dApps (React/Next.js), wallet connection, social login
 - Transaction building, sending, confirmation UX
-- SDK usage and legacy migration
-- Reference links and ecosystem resources
+- Solidity smart contracts on VeChainThor
+- Multi-clause transactions, fee delegation (VIP-191)
+- Testing with Hardhat + Thor Solo
+- Security reviews
+- VeBetterDAO / X2Earn apps, StarGate staking, governance
 
 ## Default stack (opinionated)
 
@@ -85,4 +88,14 @@ UI/hooks → SDK/scripts → Smart contracts → Testing/CI → Infra
 | VeChain Kit | [references/frontend-vechain-kit.md](references/frontend-vechain-kit.md) | VeChain Kit, useWallet, useSendTransaction, useCallClause, WalletButton, TransactionModal, social login, Privy, smart accounts, account abstraction, theming |
 | dapp-kit | [references/frontend-dappkit.md](references/frontend-dappkit.md) | dapp-kit, DAppKitProvider, lightweight wallet |
 | Legacy migration | [references/sdk-migration.md](references/sdk-migration.md) | Connex, thor-devkit, migration, deprecated |
+| Smart contracts | [references/smart-contracts.md](references/smart-contracts.md) | Solidity, Hardhat, ERC-20, ERC-721, deploy, contract interaction, libraries, contract size, upgradeable |
+| Gas optimization | [references/smart-contracts-optimization.md](references/smart-contracts-optimization.md) | gas, optimize, storage packing, assembly, unchecked |
+| Testing | [references/testing.md](references/testing.md) | test, Thor Solo, Docker, CI, fixtures |
+| ABI / codegen | [references/abi-codegen.md](references/abi-codegen.md) | TypeChain, ABI, typechain-types, code generation |
+| Fee delegation | [references/fee-delegation.md](references/fee-delegation.md) | gasless, sponsored, VIP-191, delegator, vechain.energy |
+| Multi-clause | [references/multi-clause-transactions.md](references/multi-clause-transactions.md) | batch, multi-clause, atomic, multiple operations |
+| Security | [references/security.md](references/security.md) | security, audit, vulnerability, reentrancy, access control |
+| VeBetterDAO | [references/vebetterdao.md](references/vebetterdao.md) | X2Earn, B3TR, sustainability, rewards, VeBetterDAO |
+| StarGate staking | [references/stargate-staking.md](references/stargate-staking.md) | staking, StarGate, validator, delegation, VTHO rewards, node tier |
+| Governance | [references/governance.md](references/governance.md) | VeVote, governance, voting, VOT3, proposal, steering committee |
 | Reference links | [references/resources.md](references/resources.md) | docs URL, npm link, GitHub repo |

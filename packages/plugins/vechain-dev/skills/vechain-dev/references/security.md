@@ -1,13 +1,3 @@
----
-name: security
-description: VeChain smart contract security checklist covering reentrancy, access control, integer overflow, front-running, proxy vulnerabilities, DoS, oracle manipulation, and more.
-allowed-tools: []
-model: sonnet
-license: MIT
-metadata:
-  author: VeChain
-  version: "0.1.0"
----
 
 # VeChain Smart Contract Security Checklist
 
