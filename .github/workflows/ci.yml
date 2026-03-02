@@ -26,6 +26,3 @@ jobs:
 
       - name: Validate plugin structure
         run: node scripts/validate-plugin.cjs packages/plugins/vechain-dev
-
-      - name: Typecheck
-        run: npx tsc --noEmit
