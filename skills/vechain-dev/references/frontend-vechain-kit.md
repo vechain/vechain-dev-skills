@@ -24,9 +24,35 @@ yarn add --legacy-peer-deps @chakra-ui/react@^2.8.2 \
   @tanstack/react-query@^5.64.2 \
   @vechain/dapp-kit-react@2.1.0-rc.1 \
   framer-motion@^11.15.0
+
+# Recommended: pre-built ABIs for VeChain ecosystem contracts
+yarn add @vechain/vechain-contract-types
 ```
 
 For npm, use `npm install --legacy-peer-deps` instead.
+
+**Why `@vechain/vechain-contract-types`?** It provides TypeChain-generated ABIs and factories for all major VeChain ecosystem contracts (B3TR, VOT3, StarGate, VET domains, smart accounts, etc.). Use these with `useCallClause` instead of hand-writing ABIs. See [abi-codegen.md](abi-codegen.md) for the full list.
+
+### Tailwind CSS v4 Compatibility
+
+VeChain Kit uses Chakra UI v2 internally for its modal and UI components. **Tailwind CSS v4's preflight (CSS reset) conflicts with Chakra UI's styles**, stripping default sizing from elements that Chakra expects to be intact (buttons collapse, inputs lose height, spacing breaks inside the VeChain Kit modal).
+
+**Fix: disable Tailwind's preflight.** Replace the default Tailwind import with individual imports that skip `preflight.css`:
+
+```css
+/* app/globals.css — BEFORE (broken with VeChain Kit) */
+@import "tailwindcss";
+
+/* app/globals.css — AFTER (compatible with VeChain Kit) */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+/* Omit: @import "tailwindcss/preflight.css" layer(base); */
+@import "tailwindcss/utilities.css" layer(utilities);
+```
+
+This removes Tailwind's CSS reset while keeping all utilities and theme variables. Chakra UI applies its own reset inside VeChain Kit components, so they render correctly.
+
+If you still want Tailwind's reset for your own components, scope it to your app container instead of applying it globally.
 
 ### Provider Setup (Next.js App Router)
 
@@ -103,6 +129,30 @@ export function Providers({ children }: { children: React.ReactNode }) {
 ```
 
 Then wrap `app/layout.tsx` with `<Providers>`.
+
+### Environment Variables
+
+Create `.env.local` with the required variables:
+
+```bash
+# Required for WalletConnect (get from https://cloud.walletconnect.com)
+NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id
+
+# Optional: fee delegation (omit to use Generic Delegator — users pay own gas)
+NEXT_PUBLIC_DELEGATOR_URL=https://your-delegator.com/delegate
+
+# Optional: own Privy credentials (only if using individual social methods)
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
+NEXT_PUBLIC_PRIVY_CLIENT_ID=your_privy_client_id
+```
+
+### Common Setup Pitfalls
+
+1. **SSR errors**: VeChain Kit must be dynamically imported with `{ ssr: false }` (shown above). Without this, Next.js will crash during server rendering.
+2. **Missing `--legacy-peer-deps`**: Installation fails without this flag due to Chakra UI v2 peer dependency conflicts.
+3. **Tailwind v4 breaks modal**: See [Tailwind CSS v4 Compatibility](#tailwind-css-v4-compatibility) above.
+4. **Using `email`/`google`/`passkey` without Privy credentials**: Throws _"Login methods require Privy configuration"_. Use `{ method: 'vechain' }` instead for free social login.
+5. **Missing WalletConnect project ID**: Wallet connection will fail silently. Always provide `NEXT_PUBLIC_WC_PROJECT_ID`.
 
 ### Login Methods
 
@@ -377,13 +427,49 @@ const typedSig = await signTypedData({
 
 ### @vechain/contract-getters (Framework-Agnostic Reads)
 
-For read-only blockchain queries outside of React components, use `@vechain/contract-getters`. It provides typed getters for common data (balances, VNS domains, avatars, smart accounts) and works in both Node.js and browser environments.
+For read-only blockchain queries outside of React components, use `@vechain/contract-getters`. It provides typed getters for VeBetterDAO data (B3TR, VOT3 balances, allocation voting, VeBetter Passport), VET domains, ERC-20 tokens, and more. Works in both Node.js and browser environments.
 
 ```bash
 npm install @vechain/contract-getters
+# Peer dependencies
+npm install @vechain/vechain-contract-types @vechain/sdk-network ethers
 ```
 
+**Simplest usage (no client setup needed — defaults to mainnet):**
+
+```typescript
+import { getVot3Balance, getB3trBalance } from '@vechain/contract-getters';
+
+const vot3Balance = await getVot3Balance('0xUserAddress');
+const b3trBalance = await getB3trBalance('0xUserAddress');
+```
+
+**With custom network:**
+
+```typescript
+import { getVot3Balance } from '@vechain/contract-getters';
+
+const balance = await getVot3Balance('0xUserAddress', {
+  networkUrl: 'https://testnet.vechain.org',
+});
+```
+
+**With existing ThorClient (for projects already using VeChain SDK):**
+
+```typescript
+import { ThorClient } from '@vechain/sdk-network';
+import { VeChainClient, getVot3Balance } from '@vechain/contract-getters';
+
+const thorClient = ThorClient.at('https://testnet.vechain.org');
+const vechainClient = VeChainClient.from(thorClient);
+
+const balance = await getVot3Balance('0xUserAddress', { client: vechainClient });
+```
+
+**Available modules:** `b3tr`, `vot3`, `erc20`, `vetDomain`, `allocationVoting`, `allocationPool`, `veBetterPassport`, `relayerRewardsPool`.
+
 Use this package when you need blockchain reads in:
+
 - Backend scripts or API routes
 - Non-React frontend frameworks
 - Utility functions outside of component lifecycle
