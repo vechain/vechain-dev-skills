@@ -17,6 +17,30 @@
         "repo": "vechain/vechain-ai-skills"
       },
       "description": "Full-stack VeChain development — dApps, smart contracts, fee delegation, testing, security, and DeFi ecosystem (VeBetterDAO, StarGate, governance)"
+    },
+    {
+      "name": "karpathy-guidelines",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "Behavioral guidelines to reduce common LLM coding mistakes — surface assumptions, surgical changes, simplicity first, verifiable success criteria"
+    },
+    {
+      "name": "translate",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "Manages react-i18next translation files across 15 languages — adds/removes keys, keeps files sorted, enforces fixed-word rules, verifies sync"
+    },
+    {
+      "name": "grill-me",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "Interview you relentlessly about every aspect of a plan until shared understanding — walks the design tree, resolves dependencies one-by-one"
     }
   ]
 }
