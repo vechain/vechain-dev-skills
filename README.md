@@ -10,6 +10,7 @@ npx skills add vechain/vechain-ai-skills
 
 # Claude Code Marketplace
 /plugin marketplace add vechain/vechain-ai-skills
+/plugin marketplace update vechain-ai  # Update to latest skills
 
 # Install skills
 /plugin install vechain-dev          # Full-stack VeChain development
@@ -19,6 +20,8 @@ npx skills add vechain/vechain-ai-skills
 /plugin install prd                  # PRD generator
 /plugin install ralph                # Autonomous agent runner
 /plugin install auto-voting-relayers # Auto-voting & relayer system
+
+# Update frequently to always have up to date skills
 ```
 
 ## Skills
