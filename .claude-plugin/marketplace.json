@@ -65,6 +65,14 @@
         "repo": "vechain/vechain-ai-skills"
       },
       "description": "Interview you relentlessly about every aspect of a plan until shared understanding — walks the design tree, resolves dependencies one-by-one"
+    },
+    {
+      "name": "auto-voting-relayers",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "Complete domain knowledge for VeBetterDAO's auto-voting and relayer system — smart contracts, relayer node, relayer dashboard, fee mechanics, and veDelegate comparison"
     }
   ]
 }

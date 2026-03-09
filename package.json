@@ -9,6 +9,6 @@
     "validate": "node scripts/validate-plugin.cjs"
   },
   "devDependencies": {
-    "markdownlint-cli2": "^0.17.2"
+    "markdownlint-cli2": "^0.21.0"
   }
 }

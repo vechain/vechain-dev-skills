@@ -10,6 +10,7 @@ npx skills add vechain/vechain-ai-skills
 
 # Claude Code Marketplace
 /plugin marketplace add vechain/vechain-ai-skills
+/plugin marketplace update vechain-ai  # Update to latest skills
 
 # Install skills
 /plugin install vechain-dev          # Full-stack VeChain development
@@ -18,6 +19,9 @@ npx skills add vechain/vechain-ai-skills
 /plugin install grill-me             # Relentless plan interviewer
 /plugin install prd                  # PRD generator
 /plugin install ralph                # Autonomous agent runner
+/plugin install auto-voting-relayers # Auto-voting & relayer system
+
+# Update frequently to always have up to date skills
 ```
 
 ## Skills
@@ -45,6 +49,10 @@ Generate structured Product Requirements Documents with clarifying questions, us
 ### ralph
 
 Autonomous agent runner that implements features from PRDs. Converts PRDs to `prd.json`, then executes user stories one at a time via Claude CLI — each iteration implements one story, runs type checks, commits, and moves to the next.
+
+### auto-voting-relayers
+
+Complete domain knowledge for VeBetterDAO's auto-voting and relayer system -- smart contracts (XAllocationVoting, VoterRewards, RelayerRewardsPool), relayer node, relayer dashboard, fee mechanics, and veDelegate comparison.
 
 ## Contributing
 

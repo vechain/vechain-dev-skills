@@ -27,6 +27,7 @@
     "./skills/vebetterdao",
     "./skills/stargate",
     "./skills/translate",
-    "./skills/grill-me"
+    "./skills/grill-me",
+    "./skills/auto-voting-relayers"
   ]
 }
