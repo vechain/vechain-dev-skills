@@ -13,13 +13,14 @@ npx skills add vechain/vechain-ai-skills
 /plugin marketplace update vechain-ai  # Update to latest skills
 
 # Install skills
-/plugin install vechain-dev          # Full-stack VeChain development
-/plugin install karpathy-guidelines  # LLM coding best practices
-/plugin install translate            # i18n translation management
-/plugin install grill-me             # Relentless plan interviewer
-/plugin install prd                  # PRD generator
-/plugin install ralph                # Autonomous agent runner
-/plugin install auto-voting-relayers # Auto-voting & relayer system
+/plugin install vechain-dev                  # Core VeChain SDK, fee delegation, multi-clause
+/plugin install vechain-kit                  # Frontend dApps, wallet, social login
+/plugin install smart-contract-development   # Solidity, Hardhat, testing, security
+/plugin install vebetterdao                  # X2Earn apps, B3TR/VOT3, governance
+/plugin install stargate                     # NFT staking, validators, delegation
+/plugin install translate                    # i18n translation management
+/plugin install grill-me                     # Relentless plan interviewer
+/plugin install auto-voting-relayers         # Auto-voting & relayer system
 
 # Update frequently to always have up to date skills
 ```
@@ -28,11 +29,23 @@ npx skills add vechain/vechain-ai-skills
 
 ### vechain-dev
 
-Full-stack VeChain development — dApps (VeChain Kit, dapp-kit), smart contracts (Solidity + Hardhat), fee delegation, multi-clause transactions, testing, security, and DeFi ecosystem (VeBetterDAO, StarGate, governance).
+Core VeChain development — SDK usage, fee delegation (VIP-191), multi-clause transactions, dual-token model, and legacy migration from Connex/thor-devkit.
 
-### karpathy-guidelines
+### vechain-kit
 
-Behavioral guidelines to reduce common LLM coding mistakes. Surface assumptions, make surgical changes, keep code simple, and define verifiable success criteria.
+Frontend dApp development with VeChain Kit and dapp-kit — wallet connection, social login, smart accounts, hooks, components, React Query patterns, and transaction UX.
+
+### smart-contract-development
+
+Solidity smart contract development on VeChainThor — Hardhat setup, ERC-20/721 patterns, upgradeable contracts, gas optimization, testing with Thor Solo, security auditing, and ABI codegen.
+
+### vebetterdao
+
+VeBetterDAO and X2Earn app development — B3TR/VOT3 tokens, reward distribution, sustainability proofs, app submission, governance, VeVote, and quadratic funding.
+
+### stargate
+
+StarGate staking on VeChainThor — NFT-based staking, tiered rewards, validator delegation, node management, boosting, and Phase 2 changes.
 
 ### translate
 
@@ -41,14 +54,6 @@ Manages react-i18next translation files across 15 languages. Adds/removes keys, 
 ### grill-me
 
 Interview you relentlessly about every aspect of a plan until shared understanding is reached. Walks down each branch of the design tree, resolving dependencies between decisions one-by-one.
-
-### prd
-
-Generate structured Product Requirements Documents with clarifying questions, user stories, acceptance criteria, and functional requirements. Outputs to `tasks/prd-[feature-name].md`.
-
-### ralph
-
-Autonomous agent runner that implements features from PRDs. Converts PRDs to `prd.json`, then executes user stories one at a time via Claude CLI — each iteration implements one story, runs type checks, commits, and moves to the next.
 
 ### auto-voting-relayers
 
