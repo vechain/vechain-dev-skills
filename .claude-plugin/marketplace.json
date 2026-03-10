@@ -81,6 +81,14 @@
         "repo": "vechain/vechain-ai-skills"
       },
       "description": "Scaffold a VeChain dApp — Next.js, VeChain Kit, Chakra UI v3, GitHub Pages. Standalone (frontend-only) or monorepo (Turbo + Hardhat contracts) modes"
+    },
+    {
+      "name": "react-native-wallet-link",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "React Native VeWorld wallet integration — deep link communication, NaCl encryption, transaction signing, certificate signing, EIP-712 typed data"
     }
   ]
 }
