@@ -30,6 +30,6 @@
     "./skills/grill-me",
     "./skills/auto-voting-relayers",
     "./skills/create-vechain-dapp",
-    "./skills/react-native-wallet-link"
+    "./skills/vechain-react-native-dev"
   ]
 }

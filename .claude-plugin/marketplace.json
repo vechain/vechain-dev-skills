@@ -83,7 +83,7 @@
       "description": "Scaffold a VeChain dApp — Next.js, VeChain Kit, Chakra UI v3, GitHub Pages. Standalone (frontend-only) or monorepo (Turbo + Hardhat contracts) modes"
     },
     {
-      "name": "react-native-wallet-link",
+      "name": "vechain-react-native-dev",
       "source": {
         "source": "github",
         "repo": "vechain/vechain-ai-skills"

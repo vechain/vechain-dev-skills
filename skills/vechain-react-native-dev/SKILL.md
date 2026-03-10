@@ -1,5 +1,5 @@
 ---
-name: react-native-wallet-link
+name: vechain-react-native-dev
 description: React Native VeWorld wallet integration — deep link communication, NaCl encryption, transaction signing, certificate signing, EIP-712 typed data, and multi-network support.
 allowed-tools: []
 license: MIT

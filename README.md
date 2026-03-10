@@ -22,7 +22,7 @@ npx skills add vechain/vechain-ai-skills
 /plugin install grill-me                     # Relentless plan interviewer
 /plugin install auto-voting-relayers         # Auto-voting & relayer system
 /plugin install create-vechain-dapp          # Scaffold VeChain dApp projects
-/plugin install react-native-wallet-link    # React Native VeWorld wallet integration
+/plugin install vechain-react-native-dev    # React Native VeWorld wallet integration
 
 # Update frequently to always have up to date skills
 ```
@@ -65,7 +65,7 @@ Complete domain knowledge for VeBetterDAO's auto-voting and relayer system -- sm
 
 Scaffold a VeChain dApp with Next.js 14, VeChain Kit, Chakra UI v3, and GitHub Pages deployment. Supports standalone (frontend-only) or monorepo (Turbo + Hardhat contracts) modes.
 
-### react-native-wallet-link
+### vechain-react-native-dev
 
 React Native VeWorld wallet integration — deep link communication, NaCl encryption, transaction signing, certificate signing, EIP-712 typed data, and multi-network support via `@vechain/react-native-wallet-link`.
 
