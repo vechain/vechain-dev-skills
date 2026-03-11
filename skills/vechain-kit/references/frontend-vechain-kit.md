@@ -188,7 +188,44 @@ NEXT_PUBLIC_PRIVY_CLIENT_ID=your_privy_client_id
 4. **Using `email`/`google`/`passkey` without Privy credentials**: Throws _"Login methods require Privy configuration"_. Use `{ method: 'vechain' }` instead for free social login.
 5. **Missing WalletConnect project ID**: Wallet connection will fail silently. Always provide `NEXT_PUBLIC_WC_PROJECT_ID`.
 6. **tsconfig target too low**: VeChain SDK uses BigInt literals (`0n`). Set `"target": "ES2020"` or higher in `tsconfig.json`.
-7. **Restricting wallets**: Use `dappKit: { allowedWallets: ['veworld'] }` to show only VeWorld (omit `'wallet-connect'` if you don't need WalletConnect and don't have a project ID).
+7. **BigInt serialization error** ("Do not know how to serialize a BigInt"): Set wagmi's `hashFn` as default `queryKeyHashFn`:
+
+    ```tsx
+    import { hashFn } from 'wagmi/query';
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { queryKeyHashFn: hashFn } },
+    });
+    ```
+
+8. **Restricting wallets**: Use `dappKit: { allowedWallets: ['veworld'] }` to show only VeWorld (omit `'wallet-connect'` if you don't need WalletConnect and don't have a project ID).
+9. **Privy popup blocking**: Browsers block popups that open after an async call. Pre-fetch all data before triggering `sendTransaction` so the Privy signing popup opens synchronously.
+10. **Missing `ColorModeScript`**: If VeChain Kit modals render with wrong colors, add `<ColorModeScript initialColorMode="dark" />` inside your `ChakraProvider`.
+11. **CSS conflicts with Bootstrap or custom CSS**: Use CSS layers — `@layer vechain-kit, host-app;` — and wrap your framework styles in `@layer host-app { ... }`.
+
+### Testing (mocking VeChain Kit hooks)
+
+```tsx
+jest.mock('@vechain/vechain-kit', () => ({
+  useWallet: () => ({ account: { address: '0x123...' }, isConnected: true }),
+  useCallClause: () => ({ data: [BigInt('1000000000000000000')], isLoading: false, error: null }),
+}));
+```
+
+### Sub-path Exports
+
+VeChain Kit exposes additional exports via sub-paths:
+
+```tsx
+// Contract factories (re-exports from @vechain/vechain-contract-types)
+import { IB3TR__factory } from '@vechain/vechain-kit/contracts';
+
+// Utility functions
+import { humanAddress } from '@vechain/vechain-kit/utils';
+
+// Network config (contract addresses, chain IDs)
+import { getConfig } from '@vechain/vechain-kit';
+const b3trAddress = getConfig('main').b3trContractAddress;
+```
 
 ### Login Methods
 
@@ -204,6 +241,59 @@ NEXT_PUBLIC_PRIVY_CLIENT_ID=your_privy_client_id
 
 **Important:** Using `email`, `google`, `passkey`, or `more` without the `privy` prop will throw: _"Login methods require Privy configuration. Please either remove these methods or configure the privy prop."_ Use `vechain` instead for free social login, or provide your own Privy credentials.
 
+**Grid layout:** `gridColumn` controls the width of each login button in a 4-column grid. Use `4` for full width, `2` for half width.
+
+### Ecosystem Apps
+
+Filter which ecosystem apps appear when using `{ method: 'ecosystem' }`:
+
+```tsx
+<VeChainKitProvider
+  loginMethods={[
+    { method: 'ecosystem', gridColumn: 4 },
+  ]}
+  ecosystemApps={{
+    allowedApps: ['app-id-1', 'app-id-2'], // App IDs from the Privy dashboard
+  }}
+>
+```
+
+### Legal Documents (Optional)
+
+Prompt users to accept Terms & Conditions, Privacy Policy, or Cookie Policy on wallet connect. Agreements are stored in local storage per wallet address + document type + version + URL. Incrementing `version` re-prompts users.
+
+```tsx
+<VeChainKitProvider
+  legalDocuments={{
+    allowAnalytics: true, // Optional: prompt for VeChainKit tracking consent
+    termsAndConditions: [
+      {
+        displayName: 'MyApp T&C',
+        url: 'https://myapp.com/terms',
+        version: 1,
+        required: true, // Must accept to proceed
+      },
+    ],
+    privacyPolicy: [
+      {
+        url: 'https://myapp.com/privacy',
+        version: 1,
+        required: false, // Optional: user can skip
+      },
+    ],
+    cookiePolicy: [
+      {
+        url: 'https://myapp.com/cookies',
+        version: 1,
+        required: false,
+      },
+    ],
+  }}
+>
+```
+
+Each document entry supports: `displayName` (optional label), `url`, `version`, `required` (boolean).
+
 ---
 
 ## Hooks
@@ -211,6 +301,12 @@ NEXT_PUBLIC_PRIVY_CLIENT_ID=your_privy_client_id
 All hooks use TanStack Query (React Query) and return a consistent shape:
 ```typescript
 { data, isLoading, isError, error, refetch, isRefetching }
+```
+
+All Kit queries use the `VECHAIN_KIT` prefix — use it for broad invalidation:
+```tsx
+queryClient.invalidateQueries({ queryKey: ['VECHAIN_KIT'] }); // all Kit queries
+queryClient.invalidateQueries({ queryKey: ['VECHAIN_KIT', 'CURRENT_BLOCK'] }); // specific
 ```
 
 See the **frontend** skill for React Query caching, invalidation, and loading state patterns.
@@ -222,22 +318,28 @@ import { useWallet } from '@vechain/vechain-kit';
 
 function MyComponent() {
   const {
-    account,          // Active account { address, domain, image }
-    connectedWallet,  // Current wallet regardless of connection method
-    smartAccount,     // Smart account details (for social login users)
+    account,          // Active account { address, domain, image } — smart account for Privy, wallet for DappKit
+    connectedWallet,  // Current wallet regardless of method (Privy embedded or self-custody)
+    smartAccount,     // { address, domain, image, isDeployed, isActive, version }
+    privyUser,        // Privy User object if connected via Privy, null otherwise
     connection,       // Connection state and metadata
-    disconnect,       // Disconnect function
+    disconnect,       // Disconnects + dispatches 'wallet_disconnected' event
   } = useWallet();
 
   // connection properties:
-  // isConnected, isConnectedWithSocialLogin, isConnectedWithDappKit
-  // isConnectedWithCrossApp, source: { type, displayName }
+  // isConnected, isLoading,
+  // isConnectedWithSocialLogin, isConnectedWithDappKit,
+  // isConnectedWithCrossApp, isConnectedWithPrivy, isConnectedWithVeChain,
+  // isInAppBrowser (true when running in VeWorld mobile browser),
+  // source: { type: 'privy' | 'wallet' | 'privy-cross-app', displayName },
   // nodeUrl, delegatorUrl, chainId, network
 
   if (!connection.isConnected) return <div>Not connected</div>;
   return <div>Connected: {account?.address}</div>;
 }
 ```
+
+**SmartAccount**: `isDeployed` indicates whether the smart account contract is deployed on-chain (deployed lazily on first transaction to save gas). `version` is the contract version (V3 required for multi-clause + replay protection).
 
 ### useCallClause -- Contract Reads (preferred pattern)
 
@@ -266,14 +368,41 @@ function Balance({ address }: { address: string }) {
 }
 ```
 
-**Query key** for cache invalidation:
+**Data transformation** with `select` (preferred over `useMemo` in components):
 ```tsx
-import { getCallClauseQueryKey } from '@vechain/vechain-kit';
-
-// Invalidate a specific contract read
-queryClient.invalidateQueries({
-  queryKey: getCallClauseQueryKey(CONTRACT_ADDRESS, 'balanceOf', [address]),
+return useCallClause({
+  abi: VOT3__factory.abi,
+  address: contractAddress,
+  method: 'convertedB3trOf' as const,
+  args: [address ?? ''],
+  queryOptions: {
+    enabled: !!address,
+    select: (data) => ({
+      balance: ethers.formatEther(data[0]),
+      formatted: humanNumber(ethers.formatEther(data[0])),
+    }),
+  },
 });
+```
+
+**Query keys** for cache invalidation:
+```tsx
+import {
+  getCallClauseQueryKey,
+  getCallClauseQueryKeyWithArgs,
+} from '@vechain/vechain-kit';
+
+// Without args (for methods with no params)
+const key = getCallClauseQueryKey({
+  abi, address: contractAddress, method: 'currentRoundId' as const,
+});
+
+// With args (for methods with params)
+const key = getCallClauseQueryKeyWithArgs({
+  abi, address: contractAddress, method: 'balanceOf' as const, args: [address],
+});
+
+queryClient.invalidateQueries({ queryKey: key });
 ```
 
 **Organize contract hooks** in a dedicated directory (e.g., `src/api/contracts/`):
@@ -283,6 +412,59 @@ src/api/contracts/
 ├── useTokenAllowance.ts
 ├── useVaultDeposit.ts
 └── index.ts
+```
+
+### Batch Contract Reads
+
+Use `executeMultipleClausesCall` for multiple reads in one call:
+
+```tsx
+import { executeMultipleClausesCall } from '@vechain/vechain-kit';
+
+const thor = useThor();
+const results = await executeMultipleClausesCall({
+  thor,
+  calls: addresses.map((addr) => ({
+    abi: ERC20__factory.abi,
+    functionName: 'balanceOf',
+    address: addr as `0x${string}`,
+    args: [userAddress],
+  })),
+});
+```
+
+### useBuildTransaction -- Clause Builder Pattern
+
+Wraps `useSendTransaction` with a clause-builder function. Use `thor.contracts.load().clause` to build clauses from loaded contracts:
+
+```tsx
+import { useBuildTransaction, useWallet } from '@vechain/vechain-kit';
+
+const useApproveAndSwap = () => {
+  const { account } = useWallet();
+  const thor = useThor();
+
+  return useBuildTransaction({
+    clauseBuilder: (tokenAddress: string, amount: string) => {
+      if (!account?.address) return [];
+      return [
+        {
+          ...thor.contracts.load(tokenAddress, ERC20__factory.abi)
+            .clause.approve(swapAddress, ethers.parseEther(amount)).clause,
+          comment: 'Approve token spending',
+        },
+        {
+          ...thor.contracts.load(swapAddress, SwapContract__factory.abi)
+            .clause.swap(tokenAddress, ethers.parseEther(amount)).clause,
+          comment: 'Execute swap',
+        },
+      ];
+    },
+    onTxConfirmed: () => {
+      queryClient.invalidateQueries({ queryKey: ['TOKEN_BALANCE'] });
+    },
+  });
+};
 ```
 
 ### useSendTransaction -- Core Transaction Hook
@@ -306,7 +488,9 @@ function TransactionComponent() {
     error,               // { type: 'UserRejectedError' | 'RevertReasonError', reason }
   } = useSendTransaction({
     signerAccountAddress: account?.address ?? '',
-    // gasPadding: 0.2,  // Optional: 20% gas buffer
+    // Gas options (pick one):
+    // gasPadding: 0.2,       // Float 0–1: adds % buffer on top of estimated gas
+    // suggestedMaxGas: 40000000, // Integer: explicit gas cap, overrides estimation + padding
     onTxConfirmed: () => {
       // CRITICAL: Invalidate ALL queries affected by this transaction.
       // Think through every component that reads data changed by the tx
@@ -338,9 +522,19 @@ function TransactionComponent() {
 }
 ```
 
-**Critical**: `useSendTransaction` is **mandatory** when social login is enabled.
+**Critical**: `useSendTransaction` is **mandatory** when social login is enabled. For apps without social login, you can alternatively use the `signer` exported by the kit and follow the SDK transaction guides directly.
 
 **Critical**: Pre-fetch all data before calling `sendTransaction`. Fetching during submission can trigger browser pop-up blockers for social login users.
+
+**Retry pattern**: Use `resetStatus` + `onTryAgain` for retry UX:
+```tsx
+const handleTryAgain = useCallback(async () => {
+  resetStatus();
+  await sendTransaction(clauses);
+}, [sendTransaction, clauses, resetStatus]);
+
+<TransactionModal onTryAgain={handleTryAgain} isClosable /* ...other props */ />
+```
 
 **Per-transaction delegation**: Override fee delegation for specific transactions:
 ```tsx
@@ -406,13 +600,37 @@ const { login: loginWithVeChain } = useLoginWithVeChain();
 import { useCurrentBlock, useTxReceipt, useEvents } from '@vechain/vechain-kit';
 
 const { data: block } = useCurrentBlock();             // Auto-refreshes every 10s
-const { data: receipt } = useTxReceipt(txId);          // Poll for receipt
+const { data: receipt } = useTxReceipt(txId, 5);       // Poll for receipt (blockTimeout default: 5)
 const { data: events } = useEvents({                   // Contract events
   abi: contractABI,
   address: '0xContract',
   eventName: 'Transfer',
   filterParams: { from: '0x...' },
 });
+```
+
+### Network Utility Hooks
+
+```tsx
+import { useGetChainId, useGetNodeUrl } from '@vechain/vechain-kit';
+
+const { data: chainId } = useGetChainId();   // Chain ID from genesis block
+const nodeUrl = useGetNodeUrl();              // Current node URL (custom or default)
+```
+
+### Legal Documents Hook
+
+After configuring `legalDocuments` on the provider, read agreement status with:
+
+```tsx
+import { useLegalDocuments } from '@vechain/vechain-kit';
+
+const {
+  documents,                    // All configured legal documents
+  agreements,                   // User's agreement records
+  documentsNotAgreed,           // Documents the user hasn't agreed to yet
+  hasAgreedToRequiredDocuments, // Boolean — true when all required docs are accepted
+} = useLegalDocuments();
 ```
 
 ### Oracle, Token, and Domain Hooks
@@ -426,7 +644,7 @@ import {
   useGetAvatar,
 } from '@vechain/vechain-kit';
 
-const { data: vetPrice } = useGetTokenUsdPrice('VET');
+const { data: vetPrice } = useGetTokenUsdPrice('VET');   // Supported: 'VET', 'VTHO', 'B3TR' (on-chain oracle)
 const { data: tokenInfo } = useGetCustomTokenInfo('0xToken');
 const { data: balances } = useGetCustomTokenBalances(address, ['0xToken1', '0xToken2']);
 const { data: domain } = useVechainDomain('0xAddress');   // address -> domain
@@ -434,16 +652,45 @@ const { data: resolved } = useVechainDomain('name.vet');  // domain -> address
 const { data: avatar } = useGetAvatar('name.vet');
 ```
 
+#### VET Domain Hooks (full list)
+
+**Resolution:**
+
+- `useVechainDomain(addressOrDomain)` — returns `{ address?, domain?, isValidAddressOrDomain }`
+- `useIsDomainProtected(domain)` — returns `boolean` (whether the domain is protected from claiming)
+- `useGetDomainsOfAddress(address, parentDomain?)` — returns `{ domains: Array<{ name }> }`
+
+**Records:**
+
+- `useGetTextRecords(domain)` — returns all text records for a domain
+- `useGetAvatar(domain)` — returns the avatar image URL directly (converts URI to URL), or `null`
+- `useGetAvatarOfAddress(address)` — resolves the primary domain, then returns its avatar URL; falls back to a Picasso image if no domain or avatar is set
+- `useGetResolverAddress(domain)` — returns the resolver contract address
+
+**Mutations:**
+
+- `useUpdateTextRecord({ resolverAddress, onSuccess?, onError?, signerAccountAddress? })` — returns `{ sendTransaction, isTransactionPending, error }`
+- `useClaimVeWorldSubdomain({ subdomain, domain, onSuccess?, onError?, alreadyOwned? })` — returns `{ sendTransaction, isTransactionPending, error }` (specific to `veworld.vet` subdomains)
+
+#### VET Domain Text Records
+
+`.vet` domains support ENS-compatible text records — key-value pairs stored on the resolver (ENSIP-5/18). Common records: `display` (preferred capitalisation), `avatar`, `description`, `header` (banner image, 1:3 ratio), `email`, `url`, `location`, `phone`, `keywords`. Apps can also store custom records with a prefix (e.g. `com.discord`, `org.reddit`). Records are read from the name's resolver; write availability depends on the resolver implementation.
+
 ### NFT and IPFS Hooks
 
 ```tsx
-import { useNFTImage, useIpfsImage } from '@vechain/vechain-kit';
+import { useNFTImage, useNFTMetadataUri, useIpfsImage } from '@vechain/vechain-kit';
 
-const { image, metadata, tokenId } = useNFTImage({
+// Full flow: address → tokenId → metadata → image (all resolved automatically)
+const { imageData, imageMetadata, tokenID, isLoading } = useNFTImage({
   address: walletAddress,
   contractAddress: nftContractAddress,
 });
 
+// Just the metadata URI for a known token ID
+const { data: metadataUri } = useNFTMetadataUri({ tokenId, contractAddress });
+
+// Resolve any IPFS URI to a gateway URL
 const { data: imageUrl } = useIpfsImage(ipfsUri);
 ```
 
@@ -452,16 +699,102 @@ const { data: imageUrl } = useIpfsImage(ipfsUri);
 ```tsx
 import { useSignMessage, useSignTypedData } from '@vechain/vechain-kit';
 
-const { signMessage } = useSignMessage();
-const signature = await signMessage('Hello VeChain');
+// Sign a plain message
+const { signMessage, isSigningPending, signature } = useSignMessage();
+const sig = await signMessage('Hello VeChain');
 
-const { signTypedData } = useSignTypedData();
-const typedSig = await signTypedData({
+// Sign EIP-712 typed data
+const {
+  signTypedData,
+  isSigningPending: isTypedPending,
+  signature: typedSig,
+} = useSignTypedData();
+
+const result = await signTypedData({
   domain: { name: 'MyApp', version: '1', chainId: 100009 },
   types: { Message: [{ name: 'content', type: 'string' }] },
   message: { content: 'Verify wallet ownership' },
   primaryType: 'Message',
-});
+}, { signer: account?.address }); // signer option required for proper routing
+```
+
+### Certificate Signing (Wallet Authentication)
+
+To verify wallet ownership for backend JWT flows, use `signTypedData` with EIP-712. **Do not use `useConnex` / `connex.vendor.sign('cert', ...)`** — that is deprecated.
+
+**Smart account warning:** Social login users own a smart account (contract). They sign with their Privy embedded wallet, not the smart account directly. Your backend **must verify that the signer address is the owner of the smart account**, not just compare it to the connected address.
+
+**Frontend hook pattern:**
+
+```tsx
+const { signTypedData } = useSignTypedData();
+const { account } = useWallet();
+
+const domain = { name: 'MyApp', version: '1' };
+const types = {
+  Authentication: [
+    { name: 'user', type: 'address' },
+    { name: 'timestamp', type: 'string' },
+  ],
+};
+
+const message = { user: account?.address, timestamp: new Date().toISOString() };
+const signature = await signTypedData(
+  { domain, types, message, primaryType: 'Authentication' },
+  { signer: account?.address },
+);
+// Send { signature, message } to your backend
+```
+
+**Backend verification:**
+
+```typescript
+import { ethers } from 'ethers';
+
+const signerAddress = ethers.verifyTypedData(domain, types, message, signature);
+// For wallet users: signerAddress === account address
+// For social login users: signerAddress is the embedded wallet —
+//   verify it is the owner of the smart account on-chain
+```
+
+### Language and Currency Hooks
+
+Bidirectional sync between VeChain Kit settings and your app. Changes in either direction are reflected in both places. Values persist in localStorage (`i18nextLng` for language, `vechain_kit_currency` for currency).
+
+**Provider props:**
+
+```tsx
+<VeChainKitProvider
+  language="en"                        // Initial language code
+  defaultCurrency="usd"               // 'usd' | 'eur' | 'gbp'
+  onLanguageChange={(lang) => {}}      // Fired when user changes language in Kit settings
+  onCurrencyChange={(currency) => {}}  // Fired when user changes currency in Kit settings
+>
+```
+
+**Hooks:**
+
+```tsx
+import {
+  useCurrentLanguage,
+  useCurrentCurrency,
+  useVeChainKitConfig,
+} from '@vechain/vechain-kit';
+
+// Language
+const { currentLanguage, setLanguage } = useCurrentLanguage();
+setLanguage('fr');
+
+// Currency
+const { currentCurrency, setCurrency } = useCurrentCurrency();
+setCurrency('eur'); // 'usd' | 'eur' | 'gbp'
+
+// Full config (includes both + other config properties)
+const config = useVeChainKitConfig();
+config.currentLanguage; // current runtime value
+config.currentCurrency; // current runtime value
+config.setLanguage('de');
+config.setCurrency('gbp');
 ```
 
 ### @vechain/contract-getters (Framework-Agnostic Reads)
@@ -521,13 +854,29 @@ For React components, prefer the VeChain Kit hooks (`useCallClause`, `useVechain
 
 ### WalletButton
 
+Acts as login button when disconnected and account button when connected.
+
 ```tsx
 import { WalletButton } from '@vechain/vechain-kit';
 
 <WalletButton mobileVariant="icon" desktopVariant="iconAndDomain" />
+
+// Custom styling via buttonStyle (Chakra UI style props)
+<WalletButton
+  mobileVariant="iconDomainAndAssets"
+  desktopVariant="iconDomainAndAssets"
+  buttonStyle={{
+    background: '#f08098',
+    color: 'white',
+    border: '2px solid #000',
+    _hover: { background: '#db607a' },
+  }}
+/>
 ```
 
 Variants: `icon` | `iconAndDomain` | `iconDomainAndAddress` | `iconDomainAndAssets`
+
+Note: some variants adapt based on available data (e.g. `iconDomainAndAssets` only shows assets if the user has any).
 
 ### TransactionModal
 
@@ -542,26 +891,44 @@ const { open, close, isOpen } = useTransactionModal();
   status={status}
   txReceipt={txReceipt}
   txError={error}
+  onTryAgain={handleTryAgain}
   uiConfig={{
     title: 'Confirm Transaction',
     description: 'Sending tokens...',
     showShareOnSocials: true,
     showExplorerButton: true,
+    isClosable: true,
   }}
 />
 ```
 
 ### Modal Hooks
 
+All modal hooks return `{ open, close, isOpen }`. Pass `{ isolatedView: true }` to `open()` to prevent the user from navigating to other Kit sections.
+
 ```tsx
 import {
   useAccountModal, useProfileModal, useSendTokenModal,
-  useReceiveModal, useConnectModal,
+  useReceiveModal, useConnectModal, useDAppKitWalletModal,
+  useAccountCustomizationModal, useAccessAndSecurityModal,
+  useChooseNameModal, useUpgradeSmartAccountModal,
+  useWalletModal, useTransactionToast,
+  useExploreEcosystemModal, useNotificationsModal, useFAQModal,
 } from '@vechain/vechain-kit';
 
 const { open: openProfile } = useProfileModal();
 openProfile({ isolatedView: true }); // Prevent navigation to other kit sections
+
+// Wallet-only connection (bypasses social login)
+const { open: openWalletModal } = useDAppKitWalletModal();
 ```
+
+**Account:** `useAccountModal`, `useProfileModal`, `useAccountCustomizationModal`, `useAccessAndSecurityModal`, `useChooseNameModal`, `useUpgradeSmartAccountModal`
+**Wallet/Connection:** `useConnectModal`, `useWalletModal`, `useDAppKitWalletModal`
+**Transaction:** `useTransactionModal`, `useTransactionToast`, `useSendTokenModal`, `useReceiveModal`
+**Features:** `useExploreEcosystemModal`, `useNotificationsModal`, `useFAQModal`
+
+**VeWorld mobile:** When the app is accessed from VeWorld's in-app browser, VeWorld is automatically enforced as the primary authentication method.
 
 ---
 
@@ -596,6 +963,25 @@ Create an app at [privy.io](https://privy.io), retrieve your **App ID** and **Cl
 >
 ```
 This gives your app its own branding in the login modal and a smoother single-step login flow.
+
+The `privy` prop also accepts `appearance`, `embeddedWallets`, and other [Privy SDK options](https://docs.privy.io/) as pass-through configuration.
+
+**Self-hosted Privy pros/cons:**
+
+| Pros | Cons |
+|------|------|
+| No UI confirmations on user transactions | Cost (Privy pricing) |
+| Users can backup keys and manage security in your app | You are responsible for securing the Privy account |
+| Targeted social login methods (email, Google, passkey individually) | Users must use ecosystem mode to log into other VeChain apps |
+
+**Security:** If self-hosting Privy, review the [implementation checklist](https://docs.privy.io/guide/security/implementation/) and [CSP guide](https://docs.privy.io/guide/security/implementation/csp).
+
+**Accessing Privy directly:** VeChain Kit re-exports Privy hooks — import from the kit, not from `@privy-io/react-auth`:
+```tsx
+import { usePrivy } from '@vechain/vechain-kit';
+
+const { user } = usePrivy();
+```
 
 ### Fee Delegation for Social Login
 VeChain Kit v2 auto-enables the **Generic Delegator** by default -- users pay their own gas in VET, VTHO, or B3TR. No `feeDelegation` config is required.
@@ -671,39 +1057,57 @@ See [Smart Accounts documentation](https://docs.vechainkit.vechain.org/social-lo
 
 ## Theming
 
+Minimal config: set `modal.backgroundColor` and `textColor` — all other colors auto-derive. Import `VechainKitThemeConfig` for type safety.
+
 ```tsx
-<VeChainKitProvider
-  darkMode={true}
-  theme={{
-    modal: { backgroundColor: '#1a1a1a', borderRadius: '16px', rounded: '12px' },
-    textColor: '#ffffff',
-    primaryButton: { bg: '#3b82f6', color: '#fff', rounded: '8px' },
-    secondaryButton: { bg: '#374151', color: '#fff', rounded: '8px' },
-    tertiaryButton: { bg: 'transparent', color: '#3b82f6', rounded: '8px' },
-    loginButton: { bg: '#1f2937', color: '#fff', rounded: '8px' },
-    fonts: { family: 'Inter, sans-serif' },
-  }}
->
+import type { VechainKitThemeConfig } from '@vechain/vechain-kit';
+
+const theme: VechainKitThemeConfig = {
+  modal: {
+    backgroundColor: isDarkMode ? '#1f1f1e' : '#ffffff',
+    useBottomSheetOnMobile: true, // Slide-up bottom sheet on mobile instead of centered modal
+    // border, backdropFilter, rounded are optional
+  },
+  textColor: isDarkMode ? 'rgb(223, 223, 221)' : '#2e2e2e',
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    blur: 'blur(3px)',
+  },
+  buttons: {
+    primaryButton: { bg: '#3182CE', color: 'white', border: 'none' },
+    secondaryButton: { bg: 'rgba(255,255,255,0.05)', color: '#fff', border: 'none' },
+    tertiaryButton: { bg: 'transparent', color: '#fff', border: 'none' },
+    loginButton: { bg: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' },
+  },
+  fonts: {
+    family: 'Inter, sans-serif',
+    sizes: { small: '12px', medium: '14px', large: '16px' },
+    weights: { normal: 400, medium: 500, bold: 700 },
+  },
+  effects: {
+    glass: { enabled: true, intensity: 'low' }, // 'low' | 'medium' | 'high'
+  },
+};
+
+<VeChainKitProvider theme={theme} {...otherProps}>
 ```
 
 ### Theme API reference
 
 | Prop | Shape | Notes |
 |------|-------|-------|
-| `modal` | `{ backgroundColor, borderRadius, rounded }` | Modal container |
-| `textColor` | `string` | Global text color |
-| `primaryButton` | `{ bg, color, rounded }` | Primary action buttons |
-| `secondaryButton` | `{ bg, color, rounded }` | Secondary action buttons |
-| `tertiaryButton` | `{ bg, color, rounded }` | Tertiary/ghost buttons |
-| `loginButton` | `{ bg, color, rounded }` | Login method buttons |
-| `fonts` | `{ family }` | Font family |
+| `modal` | `{ backgroundColor, border, backdropFilter, rounded, useBottomSheetOnMobile }` | Modal container. `backgroundColor` auto-derives card (80%), header (90%), secondary/tertiary, and border colors. `useBottomSheetOnMobile`: slide-up bottom sheet on mobile |
+| `textColor` | `string` | Auto-derives primary (100%), secondary (70%), tertiary (50%) text |
+| `overlay` | `{ backgroundColor, blur }` | Modal overlay backdrop |
+| `buttons` | `{ primaryButton, secondaryButton, tertiaryButton, loginButton }` | Each: `{ bg, color, border, backdropFilter?, rounded? }` |
+| `fonts` | `{ family, sizes?, weights? }` | `sizes`: `{ small, medium, large }`. `weights`: `{ normal, medium, bold }`. Scoped to Kit components only — does not affect host app |
+| `effects` | `{ glass: { enabled, intensity } }` | Glass morphism; intensity: `'low'` / `'medium'` / `'high'` |
 
 **Common mistakes:**
 
-- `buttons.primary.background` does not exist — use `primaryButton.bg`
+- `buttons.primary.background` does not exist — use `buttons.primaryButton.bg`
 - `font.family` does not exist — use `fonts.family`
 - `hoverBg` does not exist in the types
-- Minimal config: set `modal.backgroundColor` and `textColor` — all other colors auto-derive
 
 ### Chakra UI v3 compatibility
 
