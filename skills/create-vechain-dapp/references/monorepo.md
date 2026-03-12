@@ -22,12 +22,22 @@ Source files from `shared.md` go under `apps/frontend/src/`.
 │       └── src/
 │           └── (all shared.md src/ files here)
 ├── packages/
+│   ├── config/
+│   │   ├── index.ts
+│   │   ├── local.ts              ← git-ignored, auto-generated
+│   │   ├── testnet.ts
+│   │   ├── mainnet.ts
+│   │   ├── package.json
+│   │   └── scripts/
+│   │       └── generateMockLocalConfig.mjs
 │   ├── contracts/
 │   │   ├── .gitignore
 │   │   ├── contracts/
 │   │   │   └── HelloWorld.sol
 │   │   ├── hardhat.config.ts
 │   │   ├── package.json
+│   │   ├── scripts/
+│   │   │   └── checkContractsDeployment.ts
 │   │   ├── test/
 │   │   │   └── HelloWorld.test.ts
 │   │   └── tsconfig.json
@@ -50,7 +60,9 @@ Source files from `shared.md` go under `apps/frontend/src/`.
   "name": "{{PROJECT_NAME}}",
   "private": true,
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "NEXT_PUBLIC_APP_ENV=local turbo dev",
+    "dev:testnet": "NEXT_PUBLIC_APP_ENV=testnet turbo dev",
+    "dev:mainnet": "NEXT_PUBLIC_APP_ENV=mainnet turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
@@ -77,19 +89,50 @@ Source files from `shared.md` go under `apps/frontend/src/`.
 
 ### `turbo.json`
 
+The turbo pipeline ensures contracts are compiled and deployed (on solo) before the frontend starts.
+
+**Flow:** `dev` → `setup-contracts` → `compile` + `check-contracts-deployment` → `check-or-generate-local-config`
+
+- `check-or-generate-local-config` runs first to ensure `packages/config/local.ts` exists (generates mock if missing)
+- `compile` depends on config being available (Hardhat imports config)
+- `check-contracts-deployment` runs after compile — checks if contracts are deployed on solo, deploys if not, writes real addresses to `local.ts`
+- `setup-contracts` orchestrates compile + deployment check
+- `dev` depends on `setup-contracts` completing
+
 ```json
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["NEXT_PUBLIC_NETWORK", "NEXT_PUBLIC_BASE_PATH"],
+  "globalEnv": ["NEXT_PUBLIC_APP_ENV", "NEXT_PUBLIC_BASE_PATH", "MNEMONIC"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "out/**"]
     },
+    "@{{PROJECT_NAME}}/contracts#build": {
+      "cache": true,
+      "dependsOn": ["@{{PROJECT_NAME}}/config#check-or-generate-local-config"],
+      "outputs": ["artifacts/**", "typechain-types/**", "cache/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^build"]
+      "dependsOn": ["^setup-contracts"]
+    },
+    "setup-contracts": {
+      "cache": false,
+      "dependsOn": ["^compile", "@{{PROJECT_NAME}}/contracts#check-contracts-deployment"]
+    },
+    "@{{PROJECT_NAME}}/config#check-or-generate-local-config": {
+      "cache": false
+    },
+    "compile": {
+      "cache": true,
+      "dependsOn": ["@{{PROJECT_NAME}}/config#check-or-generate-local-config"],
+      "outputs": ["artifacts/**", "typechain-types/**", "cache/**"]
+    },
+    "@{{PROJECT_NAME}}/contracts#check-contracts-deployment": {
+      "cache": false,
+      "dependsOn": ["^compile", "@{{PROJECT_NAME}}/config#check-or-generate-local-config"]
     },
     "lint": {
       "cache": false
@@ -97,11 +140,9 @@ Source files from `shared.md` go under `apps/frontend/src/`.
     "typecheck": {
       "cache": false
     },
-    "compile": {
-      "outputs": ["artifacts/**", "typechain-types/**", "cache/**"]
-    },
     "test": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["^compile", "@{{PROJECT_NAME}}/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
@@ -125,6 +166,9 @@ artifacts/
 cache/
 typechain-types/
 coverage/
+
+# Auto-generated local config (each dev's solo deployment has different addresses)
+packages/config/local.ts
 ```
 
 ### `.nvmrc`
@@ -348,6 +392,184 @@ module.exports = {
 }
 ```
 
+## `packages/config/`
+
+Central configuration package. Each environment has its own file with contract addresses and network settings.
+`local.ts` is git-ignored and auto-generated — each developer's solo deployment produces different addresses.
+
+### How it works
+
+1. `check-or-generate-local-config` (turbo task) runs `generateMockLocalConfig.mjs` — creates `local.ts` with placeholder addresses if it doesn't exist
+2. Contracts compile using these placeholder addresses (Hardhat imports `getConfig()`)
+3. `check-contracts-deployment` checks if contracts are actually deployed on solo — if not, deploys them and overwrites `local.ts` with real addresses
+4. Frontend and tests use `getConfig()` which routes to the correct env file based on `NEXT_PUBLIC_APP_ENV`
+
+### `package.json`
+
+```json
+{
+  "name": "@{{PROJECT_NAME}}/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./index.ts",
+    "./local": "./local.ts",
+    "./testnet": "./testnet.ts",
+    "./mainnet": "./mainnet.ts"
+  },
+  "scripts": {
+    "check-or-generate-local-config": "ts-node ./scripts/generateMockLocalConfig.mjs"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
+```
+
+### `index.ts`
+
+```typescript
+import localConfig from "./local"
+import testnetConfig from "./testnet"
+import mainnetConfig from "./mainnet"
+
+export type AppConfig = {
+  environment: string
+  nodeUrl: string
+  network: {
+    id: string
+    name: string
+    urls: string[]
+    explorerUrl: string
+    genesis: {
+      id: string
+    }
+  }
+  contracts: {
+    helloWorld: string
+  }
+}
+
+export const AppEnv = {
+  LOCAL: "local",
+  TESTNET: "testnet",
+  MAINNET: "mainnet",
+} as const
+
+export type EnvConfig = (typeof AppEnv)[keyof typeof AppEnv]
+
+export const getConfig = (env?: string): AppConfig => {
+  const appEnv = env || process.env.NEXT_PUBLIC_APP_ENV
+  if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV must be set or env must be passed to getConfig()")
+
+  switch (appEnv) {
+    case AppEnv.LOCAL:
+      return localConfig
+    case AppEnv.TESTNET:
+      return testnetConfig
+    case AppEnv.MAINNET:
+      return mainnetConfig
+    default:
+      throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV: ${appEnv}`)
+  }
+}
+```
+
+### `testnet.ts`
+
+```typescript
+import { AppConfig } from "."
+
+const config: AppConfig = {
+  environment: "testnet",
+  nodeUrl: "https://testnet.vechain.org",
+  network: {
+    id: "testnet",
+    name: "testnet",
+    urls: ["https://testnet.vechain.org"],
+    explorerUrl: "https://explore-testnet.vechain.org",
+    genesis: {
+      id: "0x000000000b2bce3c70bc649a02749e8687721b09ed2e15997f466536b20bb127",
+    },
+  },
+  contracts: {
+    helloWorld: "", // Deploy and fill in your testnet address
+  },
+}
+
+export default config
+```
+
+### `mainnet.ts`
+
+```typescript
+import { AppConfig } from "."
+
+const config: AppConfig = {
+  environment: "mainnet",
+  nodeUrl: "https://mainnet.vechain.org",
+  network: {
+    id: "mainnet",
+    name: "mainnet",
+    urls: ["https://mainnet.vechain.org"],
+    explorerUrl: "https://explore.vechain.org",
+    genesis: {
+      id: "0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a",
+    },
+  },
+  contracts: {
+    helloWorld: "", // Deploy and fill in your mainnet address
+  },
+}
+
+export default config
+```
+
+### `scripts/generateMockLocalConfig.mjs`
+
+Generates a mock `local.ts` with placeholder addresses so compilation can proceed before contracts are deployed.
+
+```typescript
+import fs from "fs"
+import path from "path"
+
+export const generateMockLocalConfig = () => {
+  console.log("Checking if @{{PROJECT_NAME}}/config/local.ts exists...")
+  const localConfigPath = path.resolve("./local.ts")
+  if (fs.existsSync(localConfigPath)) {
+    console.log(`${localConfigPath} exists, skipping...`)
+    return
+  }
+
+  console.log(`${localConfigPath} does not exist, generating mock...`)
+  const toWrite = `import { AppConfig } from "."
+const config: AppConfig = {
+  environment: "local",
+  nodeUrl: "http://localhost:8669",
+  network: {
+    id: "solo",
+    name: "solo",
+    urls: ["http://localhost:8669"],
+    explorerUrl: "http://localhost:8669",
+    genesis: {
+      id: "0x00000000c05a20fbca2bf6ae3affba6af4a74b800b585bf7a4988aba7aea69f6",
+    },
+  },
+  contracts: {
+    helloWorld: "0x0000000000000000000000000000000000000000",
+  },
+}
+export default config
+`
+
+  console.log(`Writing mock config file to ${localConfigPath}`)
+  fs.writeFileSync(localConfigPath, toWrite)
+  console.log("Done!")
+}
+
+generateMockLocalConfig()
+```
+
 ## `packages/contracts/`
 
 ### `package.json`
@@ -360,8 +582,13 @@ module.exports = {
   "scripts": {
     "compile": "hardhat compile",
     "build": "hardhat compile",
-    "test": "hardhat test",
+    "test": "hardhat test --network hardhat",
+    "check-contracts-deployment": "hardhat run scripts/checkContractsDeployment.ts --network vechain_solo",
+    "setup-contracts": "echo 'Setup complete'",
     "clean": "hardhat clean"
+  },
+  "dependencies": {
+    "@{{PROJECT_NAME}}/config": "*"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
@@ -476,6 +703,76 @@ describe("HelloWorld", function () {
     await contract.setGreeting("Hello, World!")
     expect(await contract.greeting()).to.equal("Hello, World!")
   })
+})
+```
+
+### `scripts/checkContractsDeployment.ts`
+
+Checks if contracts are deployed on the current network. If not (on solo only), deploys them and writes real addresses to `packages/config/local.ts`.
+
+```typescript
+import { ethers, network } from "hardhat"
+import { getConfig, AppConfig } from "@{{PROJECT_NAME}}/config"
+import fs from "fs"
+import path from "path"
+
+const config = getConfig()
+const isSoloNetwork = network.name === "vechain_solo"
+
+async function main() {
+  console.log(`Checking contracts deployment on ${network.name} (${config.nodeUrl})...`)
+
+  try {
+    const code =
+      config.contracts.helloWorld === "" || config.contracts.helloWorld === "0x0000000000000000000000000000000000000000"
+        ? "0x"
+        : await ethers.provider.getCode(config.contracts.helloWorld)
+
+    if (code === "0x") {
+      console.log(`HelloWorld contract not deployed at ${config.contracts.helloWorld}`)
+
+      if (isSoloNetwork) {
+        console.log("Deploying contracts to solo network...")
+        const factory = await ethers.getContractFactory("HelloWorld")
+        const contract = await factory.deploy()
+        const address = await contract.getAddress()
+        console.log(`HelloWorld deployed at: ${address}`)
+
+        await overrideLocalConfig(address)
+      } else {
+        console.log(`Skipping deployment on ${network.name}`)
+      }
+    } else {
+      console.log("Contracts already deployed")
+    }
+  } catch (e) {
+    console.error(e)
+  }
+
+  process.exit(0)
+}
+
+async function overrideLocalConfig(helloWorldAddress: string) {
+  const newConfig: AppConfig = {
+    ...config,
+    contracts: {
+      helloWorld: helloWorldAddress,
+    },
+  }
+
+  const toWrite = `import { AppConfig } from "."
+const config: AppConfig = ${JSON.stringify(newConfig, null, 2)}
+export default config
+`
+
+  const localConfigPath = path.resolve(__dirname, "../../config/local.ts")
+  console.log(`Writing new config to ${localConfigPath}`)
+  fs.writeFileSync(localConfigPath, toWrite)
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
 })
 ```
 

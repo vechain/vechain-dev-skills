@@ -80,7 +80,7 @@ yarn install
 
 **Standalone:** `yarn dev` (localhost:3000), `yarn build` (static export → `out/`)
 
-**Monorepo:** `yarn dev`, `yarn build`, `yarn contracts:compile`, `yarn contracts:test`
+**Monorepo:** `yarn dev` (auto-deploys contracts to solo), `yarn build`, `yarn contracts:compile`, `yarn contracts:test`
 
 ### Phase 4 — Git init
 
@@ -113,6 +113,15 @@ Pin `@chakra-ui/react` to an exact version (currently `3.30.0`). VeChain Kit use
 ### Provider chain
 
 `ChakraProvider` → `ColorModeProvider` → `QueryClientProvider` → `VeChainKitProvider` → App
+
+### Config package and auto-deployment (monorepo only)
+
+The monorepo uses a `packages/config` package that centralizes contract addresses and network settings per environment. Key mechanics:
+
+- **`local.ts` is git-ignored** — each dev's solo deployment produces different addresses. A mock is auto-generated on first run.
+- **`NEXT_PUBLIC_APP_ENV`** controls which config file is loaded (`local`, `testnet`, `mainnet`).
+- **Turbo pipeline** ensures: generate mock config → compile contracts → check/deploy on solo → write real addresses → start frontend.
+- **`checkContractsDeployment.ts`** runs before dev — if contracts aren't deployed on solo, it deploys them and overwrites `local.ts` with real addresses.
 
 ### VeChain Kit integration
 
