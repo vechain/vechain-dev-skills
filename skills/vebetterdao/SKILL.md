@@ -60,4 +60,5 @@ Read the matching files BEFORE doing anything else. See Critical Rules above.
 |-------|------|---------------------------|
 | VeBetterDAO | [references/vebetterdao.md](references/vebetterdao.md) | X2Earn, B3TR, sustainability, rewards, VeBetterDAO, impact codes, app submission |
 | Governance | [references/governance.md](references/governance.md) | VeVote, governance, voting, VOT3, proposal, steering committee, quadratic funding, allocation rounds |
-| Smart contracts | [references/contracts.md](references/contracts.md) | Contract functions, roles, Emissions, XAllocationPool, X2EarnRewardsPool, VoterRewards, GalaxyMember, Treasury, GrantsManager, DBAPool, RelayerRewardsPool, B3TRGovernor, TimeLock |
+| Contracts: tokens & apps | [references/contracts-tokens-apps.md](references/contracts-tokens-apps.md) | B3TR, VOT3, Emissions, XAllocationVoting, XAllocationPool, X2EarnRewardsPool, X2EarnApps, X2EarnCreator, DBAPool, endorsement, reward distribution |
+| Contracts: governance & identity | [references/contracts-governance-identity.md](references/contracts-governance-identity.md) | B3TRGovernor, proposals, VoterRewards, GalaxyMember, Treasury, TimeLock, RelayerRewardsPool, GrantsManager, B3TRMultiSig, VeBetterPassport, signaling, entity linking, upgradeability |
