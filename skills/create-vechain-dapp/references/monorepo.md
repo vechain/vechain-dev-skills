@@ -7,6 +7,7 @@ Source files from `shared.md` go under `apps/frontend/src/`.
 
 ```text
 {{PROJECT_NAME}}/
+├── .env.example
 ├── .github/workflows/deploy.yml
 ├── .gitignore
 ├── .nvmrc
@@ -14,7 +15,6 @@ Source files from `shared.md` go under `apps/frontend/src/`.
 ├── turbo.json
 ├── apps/
 │   └── frontend/
-│       ├── .env.example
 │       ├── .eslintrc.json
 │       ├── next.config.js
 │       ├── package.json
@@ -216,6 +216,24 @@ packages/config/local.ts
 20
 ```
 
+### `.env.example`
+
+Root env file used by both frontend and contracts. Copy to `.env` before running.
+
+```text
+# ---- Wallet ----
+# Solo node mnemonic (pre-funded, for local dev only)
+MNEMONIC="denial kitchen pet squirrel other broom bar gas better priority spoil cross"
+
+# ---- Frontend ----
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=
+NEXT_PUBLIC_BASE_PATH=
+```
+
+- `MNEMONIC` — used by Hardhat for contract deployment. The default solo mnemonic has pre-funded accounts. For testnet/mainnet, replace with your own.
+- `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` — get one from https://cloud.walletconnect.com
+- `NEXT_PUBLIC_BASE_PATH` — set to `/<repo-name>` for GitHub Pages, leave empty for custom domains or local dev.
+
 ## `apps/frontend/`
 
 ### `package.json`
@@ -313,9 +331,7 @@ module.exports = nextConfig
 }
 ```
 
-### `.env.example`
-
-Same as shared — see `shared.md`.
+The frontend reads env vars from the root `.env` file (Turborepo propagates `globalEnv` vars). No separate frontend `.env.example` is needed in monorepo mode.
 
 ## `packages/typescript-config/`
 
