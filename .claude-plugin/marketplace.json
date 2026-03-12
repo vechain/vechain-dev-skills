@@ -97,6 +97,14 @@
         "repo": "vechain/vechain-ai-skills"
       },
       "description": "React Native VeWorld wallet integration — deep link communication, NaCl encryption, transaction signing, certificate signing, EIP-712 typed data"
+    },
+    {
+      "name": "x-2-earn-apps",
+      "source": {
+        "source": "github",
+        "repo": "vechain/vechain-ai-skills"
+      },
+      "description": "Build X2Earn sustainability apps on VeBetterDAO — reward distribution, sustainability proofs, app submission, endorsement, security, and VePassport integration"
     }
   ]
 }

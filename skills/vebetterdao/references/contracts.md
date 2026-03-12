@@ -49,7 +49,7 @@ ERC-20 with voting power. Obtained by converting B3TR 1:1.
 | Function | Description |
 |----------|-------------|
 | `convertToVOT3(amount)` | Swap B3TR → VOT3 |
-| `convertToB3TR(amount)` | Burn VOT3 → get B3TR back |
+| `convertToB3TR(amount)` | Burn VOT3 → get B3TR back (only self-converted amount, not VOT3 received from others) |
 | `delegate(delegatee)` | Delegate voting power (auto-delegates on first receive) |
 | `getQuadraticVotingPower(account)` | Square root of token balance |
 | `getPastQuadraticVotingPower(account, timepoint)` | Historical voting power |
@@ -286,6 +286,8 @@ Manages DAO assets. Receives emissions + unallocated funds.
 
 All transfers require `GOVERNANCE_ROLE` and contract must be unpaused.
 
+**Transfer limits** (per operation, governance-updatable): 200,000 VET, 200,000 B3TR, 3,000,000 VTHO, 50,000 VOT3. Cannot transfer non-native or non ERC-721/ERC-20 tokens.
+
 ## TimeLock
 
 Executes governance actions from B3TRGovernor with a mandatory time delay. B3TRGovernor should be the sole proposer and executor.
@@ -425,3 +427,33 @@ Sybil resistance contract. Determines if a wallet is a real person based on part
 ## B3TRProxy
 
 EIP-1967 upgradeable proxy. Delegates all calls to the current implementation address. Read implementation via storage slot `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`.
+
+---
+
+## Contract Upgradeability
+
+All upgradeable contracts use **UUPS proxy pattern** with ERC-7201 storage layout.
+
+| Contract | Upgradeable | Authorizer |
+|----------|-------------|------------|
+| B3TR | No | -- |
+| B3TRProxy | No | -- |
+| B3TRMultiSig | No | -- |
+| B3TRGovernor | Yes | Governance OR DEFAULT_ADMIN |
+| Emissions | Yes | UPGRADER_ROLE |
+| GalaxyMember | Yes | UPGRADER_ROLE |
+| TimeLock | Yes | UPGRADER_ROLE |
+| Treasury | Yes | UPGRADER_ROLE |
+| VOT3 | Yes | UPGRADER_ROLE |
+| VoterRewards | Yes | UPGRADER_ROLE |
+| X2EarnApps | Yes | UPGRADER_ROLE |
+| X2EarnCreator | Yes | UPGRADER_ROLE |
+| X2EarnRewardsPool | Yes | UPGRADER_ROLE |
+| XAllocationPool | Yes | UPGRADER_ROLE |
+| XAllocationVoting | Yes | UPGRADER_ROLE |
+| GrantsManager | Yes | UPGRADER_ROLE |
+| DBAPool | Yes | UPGRADER_ROLE |
+| RelayerRewardsPool | Yes | UPGRADER_ROLE |
+| VeBetterPassport | Yes | UPGRADER_ROLE |
+
+B3TRGovernor stores logic in external libraries (GovernorClockLogic, GovernorConfigurator, GovernorDepositLogic, GovernorFunctionRestrictionsLogic, GovernorProposalLogic, GovernorQuorumLogic, GovernorStateLogic, GovernorVotesLogic). To upgrade library logic: deploy new library → deploy new implementation linking the library → `upgradeToAndCall`.
