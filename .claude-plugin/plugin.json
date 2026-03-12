@@ -31,6 +31,7 @@
     "./skills/grill-me",
     "./skills/auto-voting-relayers",
     "./skills/create-vechain-dapp",
-    "./skills/vechain-react-native-dev"
+    "./skills/vechain-react-native-dev",
+    "./skills/indexer-core"
   ]
 }
