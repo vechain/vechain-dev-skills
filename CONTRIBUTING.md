@@ -110,6 +110,65 @@ This repo supports three install methods. All must stay in sync:
     npm run lint-markdown
     ```
 
+## Testing Your Skill
+
+Passing `npm run validate` means your skill is **structurally correct** — but that doesn't tell you whether it actually works in Claude Code. Follow this workflow to functionally test your skill before opening a PR.
+
+### Step 1 — Run all structural checks
+
+```bash
+npm run validate          # Frontmatter, plugin.json consistency
+npm run lint-markdown     # Markdown formatting
+npm run verify-refs       # Links and cross-references resolve
+npm run security-audit    # No secrets, injection patterns, or unsafe URLs
+npm run size-report       # Token budget (SKILL.md < 2 000, refs < 5 000 each)
+```
+
+Fix any errors before proceeding. These same checks run in CI on every PR.
+
+### Step 2 — Install locally
+
+```bash
+./scripts/install-local.sh            # Installs to ~/.claude/skills/vechain-dev
+# or
+./scripts/install-local.sh --project  # Installs to .claude/skills/vechain-dev (current project only)
+```
+
+> **Tip:** Use `--project` when you want the skill scoped to a single repo for isolated testing.
+
+### Step 3 — Open a Claude Code session and invoke the skill
+
+Start a **new** Claude Code session (skills are loaded at startup) and try prompts that should trigger your skill. For example, if your skill covers "token bridging":
+
+```text
+How do I bridge B3TR tokens to Ethereum?
+```
+
+Check that:
+
+- **The skill activates** — Claude should use information from your SKILL.md, not generic knowledge
+- **Reference files load on demand** — if your skill has a progressive disclosure table, ask a question that requires a specific reference and verify it gets pulled in
+- **Trigger conditions are specific enough** — your skill should not activate for unrelated prompts
+- **Answers are accurate** — compare Claude's response against the source material in your SKILL.md and references
+
+### Step 4 — Iterate
+
+Each time you edit your skill:
+
+```bash
+./scripts/install-local.sh   # Re-install (overwrites previous version)
+```
+
+Then start a new Claude Code session to pick up the changes. Repeat until the skill behaves as expected.
+
+### Quick testing checklist
+
+- [ ] All five `npm run` checks pass (validate, lint-markdown, verify-refs, security-audit, size-report)
+- [ ] Skill activates on relevant prompts
+- [ ] Skill does **not** activate on unrelated prompts
+- [ ] Reference files load correctly when deeper detail is needed
+- [ ] Answers match the content in your SKILL.md and references
+
 ## Key Files Reference
 
 | File | Purpose |
