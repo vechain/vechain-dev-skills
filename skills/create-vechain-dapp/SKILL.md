@@ -27,7 +27,7 @@ Scaffold a production-ready VeChain dApp with wallet connection, dark mode, and 
 | UI | Chakra UI v3, next-themes |
 | Wallet | @vechain/vechain-kit (VeWorld + WalletConnect) |
 | State | React Query |
-| Contracts | Hardhat + @vechain/sdk-hardhat-plugin (monorepo only) |
+| Contracts | Hardhat + @vechain/sdk-hardhat-plugin + OpenZeppelin UUPS (monorepo only) |
 | Build | Turborepo (monorepo only) |
 | Deploy | GitHub Pages via GitHub Actions |
 | Node | 20 LTS |
@@ -113,6 +113,17 @@ Pin `@chakra-ui/react` to an exact version (currently `3.30.0`). VeChain Kit use
 ### Provider chain
 
 `ChakraProvider` → `ColorModeProvider` → `QueryClientProvider` → `VeChainKitProvider` → App
+
+### Contract architecture (monorepo only)
+
+All contracts in the monorepo scaffold are **UUPS upgradeable** using OpenZeppelin's upgradeable contracts and a custom `VeChainProxy.sol` (ERC1967). Key files:
+
+- **`scripts/helpers/upgrades.ts`** — core deploy/upgrade proxy helpers. Copy as-is from the template. All deploy scripts, upgrade scripts, and tests depend on it.
+- **`contracts/VeChainProxy.sol`** — ERC1967 proxy contract. Copy as-is.
+- **`scripts/deploy/deploy.ts`** — production deployment using `deployProxy` from helpers.
+- **`scripts/upgrade/`** — interactive CLI upgrade system with versioned config registry.
+
+For contract architecture, upgrade patterns, storage safety, security, and testing — follow the **`smart-contract-development` skill**. It is the authoritative reference for all Solidity development patterns on VeChain.
 
 ### Config package and auto-deployment (monorepo only)
 
