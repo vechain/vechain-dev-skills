@@ -259,6 +259,48 @@ Static Next.js 14 (output: "export"), Chakra UI v3, VeChain Kit, Recharts. GitHu
 Average user: ~10.8k-22.6k VOT3, earns ~90-190 B3TR/round.
 At 10% fee: ~9-19 B3TR per user into pool. Relayer cost: ~0.11 B3TR. Margin: ~8.9-18.9 B3TR/user.
 
+## Navigator Citizen Integration (Phase 2)
+
+Relayers also serve navigator-delegated citizens. This is ADDITIVE on top of existing auto-voting logic.
+
+### Key differences from auto-voting
+
+| Aspect | Auto-Voting Users | Navigator Citizens |
+| --- | --- | --- |
+| Vote function | `castVoteOnBehalfOf(voter, roundId)` | `castNavigatorVote(citizen, roundId)` |
+| Discovery | `AutoVotingToggled` events | `DelegationCreated/Removed` events |
+| Preferences | User's own app list | Navigator's `AllocationPreferencesSet` |
+| Voting power | Full VOT3 balance at snapshot | Delegated amount at snapshot (checkpointed) |
+| Personhood check | Yes | No |
+| In expected actions? | Yes | **No** (Option B — voluntary service) |
+| Claim function | `claimReward(cycle, voter)` | Same — `claimReward(cycle, citizen)` |
+
+### Citizens NOT in expected actions
+
+Citizens are NOT counted in `setTotalActionsForRound`. Relayers serve them voluntarily and still earn `RelayerAction.VOTE` and `RelayerAction.CLAIM` credit. This avoids a deadlock where a navigator failing to set preferences would block ALL relayer rewards for the round.
+
+### Relayer flow for citizens (per round)
+
+1. Discover citizens via `DelegationCreated`/`DelegationRemoved` events at snapshot
+2. **Wait** for navigator to set preferences — `AllocationPreferencesSet(navigator, roundId, appIds)` event
+3. Navigators must set preferences at least ~24hr before round deadline (or get slashed)
+4. Call `castNavigatorVote(citizen, roundId)` — registers `RelayerAction.VOTE`
+5. After round ends: call `claimReward(cycle, citizen)` — navigator fee + relayer fee deducted, `RelayerAction.CLAIM` registered
+
+### Fee ordering for citizens
+
+1. Navigator fee: deducted from gross reward (goes to NavigatorRegistry fee escrow)
+2. Relayer fee: deducted from remainder (goes to RelayerRewardsPool, same % and cap as auto-voting)
+3. Citizen receives the rest
+
+### Auto-voting disabled on delegation
+
+When a user delegates to a navigator, their auto-voting is automatically disabled via `XAllocationVoting.disableAutoVotingFor(citizen)`. This prevents double-counting and conflicting vote paths.
+
+### Governance proposal voting (future)
+
+Separate job: for each active proposal, check navigator decisions, call `B3TRGovernor.castNavigatorVote(proposalId, citizen)` for each citizen.
+
 ## External Resources
 
 - Docs: https://docs.vebetterdao.org/vebetter/automation
